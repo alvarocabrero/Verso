@@ -120,7 +120,8 @@ recursos semánticos con un modelo de lenguaje.
 
 ## Documentación
 
-`README.md` y `docs/` (arquitectura, motor-de-analisis, editor, desarrollo). Si cambias
+`README.md` (inglés, el que muestra GitHub), `README.es.md` (español; mantener los dos
+iguales) y `docs/` en español (arquitectura, motor-de-analisis, editor, desarrollo). Si cambias
 el comportamiento del motor o del editor, actualiza el documento correspondiente.
 Repositorio: https://github.com/alvarocabrero/Verso (rama `main`).
 
