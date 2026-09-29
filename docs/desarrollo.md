@@ -153,6 +153,59 @@ Consejos:
 - [ ] Modo oscuro legible (margen, resaltado, panel).
 - [ ] Salir y volver a entrar conserva la nota; una nota vaciada desaparece.
 
+## Publicar una versión
+
+### Firma
+
+Las builds de release se firman con una clave propia que **no está en el repositorio**:
+
+- Clave: `%USERPROFILE%\.verso-firma\verso-release.jks` (PKCS12, alias `verso`,
+  RSA 4096, válida ~27 años).
+- Contraseñas y ruta: `keystore.properties` en la raíz del proyecto (en `.gitignore`), con
+  una copia en `%USERPROFILE%\.verso-firma\`.
+
+```properties
+storeFile=C:/Users/<usuario>/.verso-firma/verso-release.jks
+storePassword=…
+keyAlias=verso
+keyPassword=…
+```
+
+`app/build.gradle.kts` lee ese archivo si existe. Sin él, `assembleRelease` genera un APK
+sin firmar, que Android no deja instalar.
+
+> **Haz copia de seguridad de la carpeta `.verso-firma`** (por ejemplo, en un gestor de
+> contraseñas o un disco externo). Si se pierde la clave, las versiones nuevas no podrán
+> instalarse encima de las anteriores y habría que desinstalar la app (perdiendo las
+> notas).
+
+### Build de release
+
+La release activa R8 (`isMinifyEnabled`) y la reducción de recursos
+(`isShrinkResources`): el APK pasa de ~17 MB (depuración) a ~1,2 MB. Las reglas propias
+van en `app/proguard-rules.pro`; Room, Compose y Navigation ya incluyen las suyas.
+Tras cambiar dependencias, **prueba siempre la build de release** en un dispositivo: R8
+puede eliminar código que solo se usa por reflexión.
+
+### Pasos
+
+1. Sube `versionCode` (entero, +1 cada vez) y `versionName` en `app/build.gradle.kts`.
+2. Compila y comprueba:
+   ```bash
+   ./gradlew testDebugUnitTest assembleRelease
+   apksigner verify --print-certs app/build/outputs/apk/release/app-release.apk
+   ```
+3. Instálala en el emulador o un móvil y repasa la lista de comprobación de arriba. Si
+   había una build de depuración instalada, desinstálala antes (`adb uninstall
+   com.tuapp.verso`): las firmas no coinciden.
+4. Etiqueta y publica:
+   ```bash
+   git tag -a v0.1.0 -m "Verso 0.1.0"
+   git push origin v0.1.0
+   cp app/build/outputs/apk/release/app-release.apk verso-0.1.0.apk
+   gh release create v0.1.0 verso-0.1.0.apk --title "Verso 0.1.0" --notes-file notas.md
+   ```
+
 ## Convenciones
 
 - **Idioma**: nombres de clases, funciones, variables, comentarios, commits e interfaz en
