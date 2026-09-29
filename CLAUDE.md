@@ -118,6 +118,12 @@ colores de nota con variante oscura. Textos en español, en tono sencillo.
 Etiquetas, papelera con deshacer, exportar/compartir y la opción de detectar
 recursos semánticos con un modelo de lenguaje.
 
+## Documentación
+
+`README.md` y `docs/` (arquitectura, motor-de-analisis, editor, desarrollo). Si cambias
+el comportamiento del motor o del editor, actualiza el documento correspondiente.
+Repositorio: https://github.com/alvarocabrero/Verso (rama `main`).
+
 ## Convenciones
 
 - Nombres de clases, funciones y variables en español, como el código existente.
