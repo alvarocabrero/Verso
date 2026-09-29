@@ -1,5 +1,7 @@
 # Verso
 
+**Español** · [English](README.en.md)
+
 **Cuaderno de notas para Android pensado para escribir poesía y letras de canciones en español.**
 
 Verso funciona como un Google Keep sencillo (notas en cuadrícula, colores, fijar, buscar), pero
@@ -32,6 +34,12 @@ aliteración, la anáfora o el paralelismo.
   Al tocar uno se resaltan sus palabras y la pantalla se desplaza hasta él.
 - Resumen siempre visible: *«Endecasílabo · ABBA ABBA · 3 recursos»*.
 - Se puede ocultar todo el análisis con el botón **#** de la barra superior.
+
+## Descargar
+
+La última versión firmada está en
+[Releases](https://github.com/alvarocabrero/Verso/releases/latest): descarga el `.apk` en
+el móvil y permite instalar apps de ese origen cuando Android lo pida.
 
 ## Requisitos
 
