@@ -138,3 +138,9 @@ La versión en inglés de cada documento está en [docs/](docs/).
   de la métrica española (*sílaba*, *sinalefa*, *rima asonante*). No depende de Android y
   cada cambio en él va acompañado de tests.
 - Todo lo que el usuario ve en la app está en español.
+
+## Licencia
+
+Verso es software libre, publicado bajo la [Licencia Pública General de GNU v3.0](LICENSE).
+Puedes usarlo, estudiarlo, compartirlo y modificarlo; cualquier versión que se distribuya,
+modificada o no, debe mantener la misma licencia e incluir su código fuente.

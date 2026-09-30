@@ -144,3 +144,9 @@ A Spanish copy of every document is in [docs/es/](docs/es/).
   metrics terms (*sílaba*, *sinalefa*, *rima asonante*). It does not depend on Android,
   and every change to it comes with tests.
 - Everything the user sees in the app is in Spanish.
+
+## License
+
+Verso is free software, released under the [GNU General Public License v3.0](LICENSE).
+You can use, study, share and modify it; any distributed version, modified or not,
+must stay under the same license and include its source code.
