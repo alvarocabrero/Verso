@@ -67,7 +67,10 @@ import androidx.compose.ui.unit.dp
 import com.tuapp.analisis.AnalisisPoema
 import com.tuapp.analisis.Metrica
 import com.tuapp.analisis.Recursos
+import com.tuapp.analisis.Rima
 import com.tuapp.ui.theme.VerseStyle
+import com.tuapp.ui.theme.rhymeBackground
+import androidx.compose.foundation.shape.RoundedCornerShape
 
 /** How a selected literary device is marked on the text. */
 enum class HighlightStyle { BACKGROUND, UNDERLINE, DOTTED }
@@ -89,9 +92,12 @@ private val MARGIN_WIDTH = 56.dp
 /**
  * The verse field. With [analysis], it shows the syllables and rhyme letter of
  * each line in the right margin, aligned with the line's last visual row (a
- * long line can wrap over several). Only what matches the current text is
- * drawn: while the analysis lags behind, the margin stays if the number of
- * lines hasn't changed, and the highlight is hidden.
+ * long line can wrap over several). With [colorRhymes], each rhyme ending gets
+ * a highlighter background in its group's colour.
+ *
+ * While the analysis lags behind the text, the margin stays if the number of
+ * lines hasn't changed, and highlighted ranges are shifted past the edit (those
+ * touching the edited part are hidden until the new analysis arrives).
  */
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
@@ -102,13 +108,23 @@ fun VerseEditor(
     analysis: AnalisisPoema.Resultado?,
     highlight: Highlight?,
     showMargin: Boolean,
+    colorRhymes: Boolean,
     onLayout: (TextLayoutResult) -> Unit,
     modifier: Modifier = Modifier
 ) {
     var layout by remember { mutableStateOf<TextLayoutResult?>(null) }
     val colors = MaterialTheme.colorScheme
-    val current = analysis?.takeIf { it.texto == value }
     val margin = analysis?.takeIf { it.lineas.size == value.count { c -> c == '\n' } + 1 }
+
+    // Ranges from the analysed text, moved to where they are in the current text
+    val shift = remember(analysis?.texto, value) { analysis?.let { rangeShifter(it.texto, value) } }
+    val shiftedHighlight = highlight?.let { h -> shift?.let { s -> h.copy(ranges = h.ranges.mapNotNull(s)) } }
+    val rhymeSpans = remember(analysis, colorRhymes) {
+        if (colorRhymes && analysis != null) AnalisisPoema.tramosDeRima(analysis) else emptyList()
+    }
+    val rhymeFills = rhymeSpans.mapNotNull { span ->
+        shift?.invoke(span.rango)?.let { it to rhymeBackground(span.grupo, span.tipo) }
+    }
 
     // Own TextFieldValue so we know where the cursor is
     var field by remember { mutableStateOf(TextFieldValue(value, TextRange(value.length))) }
@@ -152,17 +168,48 @@ fun VerseEditor(
                 )
                 .bringIntoViewRequester(bringIntoView)
                 .drawBehind {
-                    val l = layout
-                    if (l != null && current != null && highlight != null) drawHighlight(l, highlight, colors.primary)
+                    val l = layout ?: return@drawBehind
+                    rhymeFills.forEach { (range, fill) -> drawBackground(l, range, fill) }
+                    if (shiftedHighlight != null) drawHighlight(l, shiftedHighlight, colors.primary)
                 }
         )
         val l = layout
-        if (showMargin && margin != null && l != null) VerseMargin(margin, l, Modifier.align(Alignment.TopEnd))
+        if (showMargin && margin != null && l != null) {
+            VerseMargin(margin, l, colorRhymes, Modifier.align(Alignment.TopEnd))
+        }
+    }
+}
+
+/**
+ * Maps a range of [old] to the same characters in [new], assuming a single
+ * contiguous edit (what typing produces). Ranges before the edit stay, those
+ * after it move by the length difference, and those overlapping it return null.
+ */
+private fun rangeShifter(old: String, new: String): (IntRange) -> IntRange? {
+    if (old == new) return { it }
+    val maxCommon = minOf(old.length, new.length)
+    var prefix = 0
+    while (prefix < maxCommon && old[prefix] == new[prefix]) prefix++
+    var suffix = 0
+    while (suffix < maxCommon - prefix && old[old.length - 1 - suffix] == new[new.length - 1 - suffix]) suffix++
+    val delta = new.length - old.length
+    val editEnd = old.length - suffix
+    return { r ->
+        when {
+            r.last < prefix -> r
+            r.first >= editEnd -> (r.first + delta)..(r.last + delta)
+            else -> null
+        }
     }
 }
 
 @Composable
-private fun VerseMargin(analysis: AnalisisPoema.Resultado, layout: TextLayoutResult, modifier: Modifier) {
+private fun VerseMargin(
+    analysis: AnalisisPoema.Resultado,
+    layout: TextLayoutResult,
+    colorRhymes: Boolean,
+    modifier: Modifier
+) {
     val density = LocalDensity.current
     val colors = MaterialTheme.colorScheme
     val topPadding = with(density) { TEXT_TOP_PADDING.roundToPx() }
@@ -198,15 +245,47 @@ private fun VerseMargin(analysis: AnalisisPoema.Resultado, layout: TextLayoutRes
                     color = if (line.encaja) colors.onSurfaceVariant else colors.error,
                     textAlign = TextAlign.End
                 )
+                val rhymes = letter != null && letter != '-'
                 Text(
-                    if (letter == null || letter == '-') "·" else "$letter",
+                    if (rhymes) "$letter" else "·",
                     style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold),
-                    color = if (letter == null || letter == '-') colors.outlineVariant else colors.primary,
-                    textAlign = TextAlign.End,
-                    modifier = Modifier.width(18.dp)
+                    color = if (rhymes) colors.primary else colors.outlineVariant,
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier
+                        .padding(start = 2.dp)
+                        .width(18.dp)
+                        .then(
+                            if (colorRhymes && rhymes) Modifier.background(
+                                rhymeBackground(letter!!.lowercaseChar() - 'a', Rima.Tipo.CONSONANTE),
+                                RoundedCornerShape(4.dp)
+                            ) else Modifier
+                        )
                 )
             }
         }
+    }
+}
+
+/** Highlighter-style rounded background behind the characters of [range]. */
+private fun DrawScope.drawBackground(layout: TextLayoutResult, range: IntRange, fill: Color) {
+    val start = range.first
+    val end = range.last + 1
+    if (start < 0 || end > layout.layoutInput.text.length || start >= end) return
+    val first = layout.getLineForOffset(start)
+    val last = layout.getLineForOffset(end - 1)
+    for (ln in first..last) {
+        val x1 = if (ln == first) layout.getHorizontalPosition(start, true) else layout.getLineLeft(ln)
+        val x2 = if (ln == last) layout.getHorizontalPosition(end, true) else layout.getLineRight(ln)
+        val left = minOf(x1, x2)
+        val right = maxOf(x1, x2)
+        val baseline = layout.getLineBaseline(ln)
+        val lineHeight = layout.getLineBottom(ln) - layout.getLineTop(ln)
+        drawRoundRect(
+            fill,
+            topLeft = Offset(left - 2.dp.toPx(), baseline - lineHeight * .62f),
+            size = Size(right - left + 4.dp.toPx(), lineHeight * .8f),
+            cornerRadius = CornerRadius(4.dp.toPx())
+        )
     }
 }
 
@@ -259,7 +338,8 @@ fun AnalysisPanel(
     selected: Recursos.Recurso?,
     onSelect: (Recursos.Recurso) -> Unit,
     seseo: Boolean,
-    onSeseoChange: (Boolean) -> Unit
+    onSeseoChange: (Boolean) -> Unit,
+    colorRhymes: Boolean
 ) {
     var expanded by rememberSaveable { mutableStateOf(false) }
     // With the keyboard open, the expanded panel would leave no room for the verses
@@ -292,12 +372,17 @@ fun AnalysisPanel(
         }
         AnimatedVisibility(visible = expanded) {
             Column {
-                Row(Modifier.padding(horizontal = 16.dp)) {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(12.dp),
+                    modifier = Modifier.padding(horizontal = 16.dp)
+                ) {
                     FilterChip(
                         selected = seseo,
                         onClick = { onSeseoChange(!seseo) },
                         label = { Text("Seseo (casa = caza)") }
                     )
+                    if (colorRhymes && analysis != null) RhymeLegend(analysis)
                 }
                 if (devices.isEmpty()) {
                     Text(
@@ -371,4 +456,26 @@ private fun summary(a: AnalisisPoema.Resultado?): String {
 private fun verseNumbers(a: AnalisisPoema.Resultado): List<Int?> {
     var n = 0
     return a.lineas.map { if (it.silabas != null) ++n else null }
+}
+
+/** The rhyme letters in use, each on its colour, as a legend for the coloured text. */
+@Composable
+private fun RhymeLegend(analysis: AnalisisPoema.Resultado) {
+    val letters = analysis.lineas.mapNotNull { l -> l.rima?.takeIf { it.tipo != null }?.letra }.distinct()
+    if (letters.isEmpty()) return
+    Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+        letters.forEach { letter ->
+            Text(
+                "$letter",
+                style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold),
+                textAlign = TextAlign.Center,
+                modifier = Modifier
+                    .width(20.dp)
+                    .background(
+                        rhymeBackground(letter.lowercaseChar() - 'a', Rima.Tipo.CONSONANTE),
+                        RoundedCornerShape(4.dp)
+                    )
+            )
+        }
+    }
 }

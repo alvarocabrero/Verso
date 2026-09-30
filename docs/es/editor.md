@@ -39,6 +39,8 @@ está en [analysis-engine.md](analysis-engine.md); el ciclo de vida de la nota, 
   (Darío, Machado, Bécquer, Lope, Lorca, Hernández…), dónde se ha encontrado en el texto
   y, en las aliteraciones, cuántas veces más de lo normal aparece el sonido y por qué
   cuenta como clara o posible. Los textos están en `ui/editor/DeviceInfo.kt`.
+- **Botón del pincel** (barra superior, solo con el análisis visible): activa o desactiva el
+  coloreado de rimas; se recuerda entre sesiones. Ver [Colorear las rimas](#colorear-las-rimas).
 - **Botón #** (barra superior): muestra u oculta todo el análisis. Se recuerda entre
   sesiones.
 
@@ -99,7 +101,7 @@ el resultado corresponde a un texto anterior. Para no dibujar marcas en sitios e
 | Qué | Se muestra si… | Motivo |
 |---|---|---|
 | Margen | el resultado tiene **el mismo número de líneas** que el texto actual | Escribir dentro de un verso no mueve los versos; añadir o quitar líneas sí |
-| Resaltado | el texto analizado es **idéntico** al actual | Los rangos son posiciones de carácter: cualquier cambio los desplaza |
+| Resaltado y colores de rima | siempre, trasladados tras la edición (ver [más abajo](#otra-vez-el-análisis-que-va-por-detrás)) | Los rangos son posiciones de carácter: una edición mueve los que van detrás |
 
 En la práctica, el margen no parpadea al escribir dentro de un verso y se oculta un
 momento al pulsar Intro.
@@ -122,6 +124,31 @@ color primario del tema, así que funciona igual en claro y en oscuro.
 
 Si el recurso elegido desaparece tras editar (el nuevo análisis no lo contiene), la
 selección se borra sola.
+
+## Colorear las rimas
+
+Con el botón del pincel activado (`Preferences.colorRhymes`, clave `color_rhymes`), el editor
+dibuja un fondo tipo rotulador detrás de cada tramo de `AnalisisPoema.tramosDeRima` (ver
+[analysis-engine.md](analysis-engine.md#tramos-para-colorear-las-rimas)):
+
+- **Un color por grupo**: `rhymeColor(group)` en `ui/theme/RhymeColors.kt`, de la paleta
+  Okabe–Ito (naranja, azul cielo, verde azulado, amarillo, azul, bermellón, púrpura rojizo,
+  oliva), que se distingue bien también con daltonismo. Se repite a partir del noveno grupo.
+- **Intensidad**: rimas consonantes al 26 % de opacidad y asonantes al 12 % (34 % y 17 % en
+  modo oscuro, donde el tinte se ve menos). Solo se colorea la terminación que rima, no la
+  palabra entera.
+- La **letra del margen** lleva el mismo fondo, y el panel desplegado muestra una leyenda con
+  las letras en uso junto al botón de seseo.
+- Primero se dibujan los fondos de rima y encima el resaltado del recurso elegido.
+
+## Otra vez el análisis que va por detrás
+
+Los rangos (tramos de rima y resaltado de recursos) se calculan sobre el texto analizado. En
+lugar de ocultarlos mientras llega el análisis nuevo, `rangeShifter(old, new)` localiza el
+único tramo editado (prefijo y sufijo comunes) y traslada cada rango: los de antes de la
+edición se quedan, los de después se desplazan según la diferencia de longitud y los que
+tocan la edición se ocultan hasta el siguiente análisis. Así los colores no parpadean con
+cada tecla.
 
 ## Desplazarse al recurso
 

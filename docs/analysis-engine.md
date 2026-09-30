@@ -472,6 +472,21 @@ data class Linea(
 
 Matching is case-insensitive.
 
+### Rhyme colouring spans
+
+`AnalisisPoema.tramosDeRima(r)` returns the pieces of text to colour when rhyme colouring
+is on, as `TramoRima(rango, grupo, tipo)` (range, colour group, rhyme type):
+
+- the **rhyming ending** (from the stressed vowel to the end of the word) of every line that
+  rhymes with another, with the group of its letter (A = 0, B = 1…) and its type
+  (`CONSONANTE` or `ASONANTE`). Unrhymed lines (`-`) are not coloured;
+- both words of every **internal rhyme**, as full rhymes: with the group of the line whose
+  end rhyme they share (*soneto* takes the colour of *aprieto*'s group) or, if there is
+  none, a new group after the letters' groups.
+
+Example (Lope's quatrain): *son**eto*** (internal, B), *Viol**ante*** (A),
+*apri**eto*** (B), *son**eto*** (B), *del**ante*** (A).
+
 ---
 
 ## Tests
@@ -484,7 +499,7 @@ Matching is case-insensitive.
 | `MetricaTest` | 8 | *Sinalefa* (with h), final-stress rule, *dialefa* on a stressed vowel, alexandrine, final y, metre not admitted, dominant metre of a sonnet |
 | `RimaTest` | 8 | Endings, full rhymes, assonant rhymes, non-rhymes, *seseo*, sonnet and *romance* schemes, assonant/consonant merging |
 | `RecursosTest` | 19 | Each device type, alliteration in one and two lines, merging, intensity, internal rhymes, and no false positives in well-known lines |
-| `AnalisisPoemaTest` | 9 | Metre and scheme of a quatrain, *arte menor*, a line that doesn't fit, offsets, empty text, highlight ranges |
+| `AnalisisPoemaTest` | 13 | Metre and scheme of a quatrain, *arte menor*, a line that doesn't fit, offsets, empty text, highlight ranges, rhyme colouring spans |
 
 To add a case, use real lines of verse (by well-known authors when possible) and add a
 comment explaining why the result is the expected one.

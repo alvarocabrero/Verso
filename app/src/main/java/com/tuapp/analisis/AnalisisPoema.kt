@@ -98,4 +98,54 @@ object AnalisisPoema {
             elegidas.map { it.rango }
         }
     }
+
+    // ---------- Coloreado de rimas ----------
+
+    /**
+     * Terminación que rima (desde la vocal tónica hasta el final de la palabra)
+     * con su [grupo] de color y el [tipo] de rima.
+     */
+    data class TramoRima(val rango: IntRange, val grupo: Int, val tipo: Rima.Tipo)
+
+    /** Rango de la terminación de rima de [palabra], que ocupa [rangoPalabra] en el texto. */
+    private fun terminacionEn(palabra: String, rangoPalabra: IntRange, seseo: Boolean): IntRange? {
+        val t = Rima.terminacion(palabra, seseo) ?: return null
+        val fin = rangoPalabra.last
+        return (fin - t.texto.length + 1)..fin
+    }
+
+    /**
+     * Tramos que hay que colorear para ver las rimas:
+     * - la terminación de cada verso que rima con otro, con el grupo de su letra
+     *   (A = 0, B = 1…) y su tipo (consonante o asonante);
+     * - las dos palabras de cada rima interna: con el grupo del verso cuya rima
+     *   final comparten o, si no hay ninguno, con un grupo nuevo tras los de las letras.
+     */
+    fun tramosDeRima(r: Resultado): List<TramoRima> {
+        val out = mutableListOf<TramoRima>()
+        val grupoPorClave = mutableMapOf<String, Int>()
+
+        r.lineas.forEachIndexed { i, l ->
+            val rima = l.rima ?: return@forEachIndexed
+            val tipo = rima.tipo ?: return@forEachIndexed        // verso suelto: no se colorea
+            val grupo = rima.letra.lowercaseChar() - 'a'
+            val ultima = palabrasConPosicion(r, i).lastOrNull() ?: return@forEachIndexed
+            val rango = terminacionEn(ultima.texto, ultima.rango, r.seseo) ?: return@forEachIndexed
+            out += TramoRima(rango, grupo, tipo)
+            grupoPorClave.putIfAbsent(rima.terminacion.consonante, grupo)
+        }
+
+        var siguiente = (out.maxOfOrNull { it.grupo } ?: -1) + 1
+        r.recursos.filter { it.tipo == Recursos.Tipo.RIMA_INTERNA }.forEach { recurso ->
+            val palabras = rangos(r, recurso).map { r.texto.substring(it) to it }
+            val clave = palabras.firstNotNullOfOrNull { (p, _) -> Rima.terminacion(p, r.seseo)?.consonante }
+                ?: return@forEach
+            val grupo = grupoPorClave.getOrPut(clave) { siguiente++ }
+            palabras.forEach { (p, rango) ->
+                val t = terminacionEn(p, rango, r.seseo) ?: return@forEach
+                if (out.none { it.rango == t }) out += TramoRima(t, grupo, Rima.Tipo.CONSONANTE)
+            }
+        }
+        return out.sortedBy { it.rango.first }
+    }
 }

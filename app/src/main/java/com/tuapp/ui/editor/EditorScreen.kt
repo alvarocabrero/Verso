@@ -18,6 +18,8 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.filled.Numbers
+import androidx.compose.material.icons.filled.Brush
+import androidx.compose.material.icons.outlined.Brush
 import androidx.compose.material.icons.outlined.Numbers
 import androidx.compose.material3.LocalContentColor
 import androidx.compose.runtime.LaunchedEffect
@@ -91,6 +93,16 @@ fun EditorScreen(
                             contentDescription = if (show) "Ocultar análisis" else "Mostrar análisis",
                             tint = if (show) MaterialTheme.colorScheme.primary else LocalContentColor.current
                         )
+                    }
+                    if (show) {
+                        val colored = vm.preferences.colorRhymes
+                        IconButton(onClick = { vm.preferences.updateColorRhymes(!colored) }) {
+                            Icon(
+                                if (colored) Icons.Filled.Brush else Icons.Outlined.Brush,
+                                contentDescription = if (colored) "Quitar colores de rima" else "Colorear rimas",
+                                tint = if (colored) MaterialTheme.colorScheme.primary else LocalContentColor.current
+                            )
+                        }
                     }
                     IconButton(onClick = vm::togglePinned) {
                         Icon(
@@ -172,6 +184,7 @@ fun EditorScreen(
                     analysis = analysis,
                     highlight = highlight,
                     showMargin = showAnalysis,
+                    colorRhymes = showAnalysis && vm.preferences.colorRhymes,
                     onLayout = { versesLayout = it },
                     modifier = Modifier.onGloballyPositioned { versesY = it.positionInParent().y }
                 )
@@ -182,7 +195,8 @@ fun EditorScreen(
                 selected = selected,
                 onSelect = vm::selectDevice,
                 seseo = vm.preferences.seseo,
-                onSeseoChange = vm.preferences::updateSeseo
+                onSeseoChange = vm.preferences::updateSeseo,
+                colorRhymes = vm.preferences.colorRhymes
             )
         }
     }

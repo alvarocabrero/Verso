@@ -39,6 +39,8 @@ The app's interface and analysis are in Spanish, and it is designed for Spanish 
   Tapping one highlights its words and scrolls to it.
 - An always-visible summary: *«Endecasílabo · ABBA ABBA · 3 recursos»* (hendecasyllable,
   rhyme scheme, number of devices).
+- **Rhyme colouring** (brush button): each rhyme group gets its own highlighter colour on the
+  rhyming ending, softer for assonant rhymes; internal rhymes take their group's colour.
 - The whole analysis can be hidden with the **#** button in the top bar.
 
 ## Download
@@ -90,7 +92,7 @@ app/src/main/java/com/tuapp/
   ui/editor/           Editor with autosave and real-time analysis
   ui/theme/            "Ink on paper" theme, verse text styles and note palette
   analisis/            Analysis engine in pure Kotlin (no Android dependencies)
-app/src/test/java/com/tuapp/analisis/   JUnit tests for the engine (53)
+app/src/test/java/com/tuapp/analisis/   JUnit tests for the engine (57)
 docs/                  Technical documentation (docs/es/: Spanish copy)
 ```
 

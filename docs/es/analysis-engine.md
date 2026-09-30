@@ -437,6 +437,21 @@ data class Linea(
 
 La comparación no distingue mayúsculas.
 
+### Tramos para colorear las rimas
+
+`AnalisisPoema.tramosDeRima(r)` devuelve los trozos de texto que hay que colorear cuando se
+activa el coloreado de rimas, como `TramoRima(rango, grupo, tipo)`:
+
+- la **terminación que rima** (desde la vocal tónica hasta el final de la palabra) de cada
+  verso que rima con otro, con el grupo de su letra (A = 0, B = 1…) y su tipo
+  (`CONSONANTE` o `ASONANTE`). Los versos sueltos (`-`) no se colorean;
+- las dos palabras de cada **rima interna**, como rima consonante: con el grupo del verso
+  cuya rima final comparten (*soneto* toma el color del grupo de *aprieto*) o, si no hay
+  ninguno, con un grupo nuevo tras los de las letras.
+
+Ejemplo (cuarteto de Lope): *son**eto*** (interna, B), *Viol**ante*** (A),
+*apri**eto*** (B), *son**eto*** (B), *del**ante*** (A).
+
 ---
 
 ## Tests
@@ -449,7 +464,7 @@ La comparación no distingue mayúsculas.
 | `MetricaTest` | 8 | Sinalefa (con h), ley del acento final, dialefa en vocal tónica, alejandrino, y final, metro no admitido, metro dominante de un soneto |
 | `RimaTest` | 8 | Terminaciones, consonantes, asonantes, no rimas, seseo, esquemas de soneto y romance, fusión asonante/consonante |
 | `RecursosTest` | 19 | Cada tipo de recurso, aliteración en uno y dos versos, fusión, intensidad, rimas internas y ausencia de falsos positivos en versos conocidos |
-| `AnalisisPoemaTest` | 9 | Metro y esquema de un cuarteto, arte menor, verso que no encaja, posiciones, texto vacío, rangos de resaltado |
+| `AnalisisPoemaTest` | 13 | Metro y esquema de un cuarteto, arte menor, verso que no encaja, posiciones, texto vacío, rangos de resaltado, tramos para colorear rimas |
 
 Para añadir un caso: usa versos reales (de autores conocidos cuando sea posible) y anota
 en un comentario por qué el resultado es el esperado.

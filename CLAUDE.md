@@ -16,7 +16,7 @@ text analysis: metrical syllables per line, rhymes and literary devices.
 
 ## Status
 
-- Builds with no warnings (`gradlew assembleDebug` / `assembleRelease`) and the 53
+- Builds with no warnings (`gradlew assembleDebug` / `assembleRelease`) and the 57
   engine tests pass (`gradlew testDebugUnitTest`). Tested on an emulator, not yet on a
   real phone.
 - Release v0.1.0 is published on GitHub (signed APK, ~1.2 MB).
@@ -107,8 +107,10 @@ one metre per poem.
   (background; clear alliteration solid underline, possible dotted) and `AnalysisPanel`
   (summary metre · scheme · device count, expandable list and seseo; collapses when the
   keyboard opens). Selecting a device scrolls to its first line.
-- `data/Preferences` (SharedPreferences as Compose state): seseo and show/hide analysis
-  (button in the top bar).
+- `data/Preferences` (SharedPreferences as Compose state): seseo, show/hide analysis and rhyme colouring
+  (buttons in the top bar). Rhyme colouring: `AnalisisPoema.tramosDeRima` gives the spans,
+  `ui/theme/RhymeColors.kt` the Okabe–Ito palette (assonant softer), and `rangeShifter`
+  keeps highlights in place while the analysis lags behind.
 
 ## Design
 

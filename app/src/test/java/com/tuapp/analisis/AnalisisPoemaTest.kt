@@ -86,4 +86,48 @@ class AnalisisPoemaTest {
         val recurso = r.recursos.first { it.tipo == GEMINACION }
         assertEquals(listOf("verde", "verde", "verde"), textos(r, AnalisisPoema.rangos(r, recurso)))
     }
+
+    // ---------- Coloreado de rimas ----------
+
+    private fun tramos(texto: String, seseo: Boolean = false): List<Triple<String, Int, Rima.Tipo>> {
+        val r = AnalisisPoema.analizar(texto, seseo)
+        return AnalisisPoema.tramosDeRima(r).map { Triple(texto.substring(it.rango), it.grupo, it.tipo) }
+    }
+
+    @Test fun tramosDeUnCuarteto() {
+        val c = Rima.Tipo.CONSONANTE
+        assertEquals(
+            listOf(
+                Triple("eto", 1, c),     // «soneto», rima interna con «aprieto» (grupo B)
+                Triple("ante", 0, c),    // Violante (A)
+                Triple("eto", 1, c),     // aprieto (B)
+                Triple("eto", 1, c),     // soneto (B)
+                Triple("ante", 0, c)     // delante (A)
+            ),
+            tramos(lope)
+        )
+    }
+
+    @Test fun tramosSoloDeVersosQueRiman() {
+        // -a-a: los versos sueltos no se colorean; el «pasar» del tercer verso
+        // es rima interna con «mar» y toma su color
+        assertEquals(
+            List(3) { Triple("ar", 0, Rima.Tipo.CONSONANTE) },
+            tramos(machado)
+        )
+    }
+
+    @Test fun tramosAsonantes() {
+        assertEquals(
+            listOf(Triple("elo", 0, Rima.Tipo.ASONANTE), Triple("ejos", 0, Rima.Tipo.ASONANTE)),
+            tramos("mirando al cielo\nse fue muy lejos")
+        )
+    }
+
+    @Test fun rimaInternaSinFinalTieneGrupoPropio() {
+        assertEquals(
+            listOf(Triple("una", 0, Rima.Tipo.CONSONANTE), Triple("una", 0, Rima.Tipo.CONSONANTE)),
+            tramos("la luna sobre la laguna se dormía")
+        )
+    }
 }

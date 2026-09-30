@@ -33,6 +33,8 @@ aliteración, la anáfora o el paralelismo.
   epanadiplosis, geminación, polisíndeton, asíndeton, paralelismo, estribillo y rima interna.
   Al tocar uno se resaltan sus palabras y la pantalla se desplaza hasta él.
 - Resumen siempre visible: *«Endecasílabo · ABBA ABBA · 3 recursos»*.
+- **Colorear rimas** (botón del pincel): cada grupo de rima tiene su color de rotulador en la
+  terminación que rima, más suave en las asonantes; las rimas internas toman el color de su grupo.
 - Se puede ocultar todo el análisis con el botón **#** de la barra superior.
 
 ## Descargar
@@ -84,7 +86,7 @@ app/src/main/java/com/tuapp/
   ui/editor/           Editor con autoguardado y análisis en tiempo real
   ui/theme/            Tema "tinta sobre papel", estilos de verso y paleta de notas
   analisis/            Motor de análisis en Kotlin puro (sin Android)
-app/src/test/java/com/tuapp/analisis/   Tests JUnit del motor (53)
+app/src/test/java/com/tuapp/analisis/   Tests JUnit del motor (57)
 docs/                  Documentación técnica en inglés (docs/es/: en español)
 ```
 

@@ -38,6 +38,8 @@ is in [analysis-engine.md](analysis-engine.md); the note's lifecycle, in
   example (Darío, Machado, Bécquer, Lope, Lorca, Hernández…), where it was found in the
   text and, for alliterations, how many times more frequent than usual the sound is and
   why it counts as clear or possible. The texts live in `ui/editor/DeviceInfo.kt`.
+- **Brush button** (top bar, only while the analysis is shown): turns rhyme colouring on
+  and off; remembered across sessions. See [Rhyme colouring](#rhyme-colouring).
 - **# button** (top bar): shows or hides the whole analysis. Remembered across sessions.
 
 All user-facing text is in Spanish.
@@ -98,7 +100,7 @@ earlier version of the text. To avoid drawing marks in the wrong places:
 | What | Shown when… | Why |
 |---|---|---|
 | Margin | the result has **the same number of lines** as the current text | Typing inside a line doesn't move lines; adding or removing lines does |
-| Highlight | the analysed text is **identical** to the current one | Ranges are character offsets: any change shifts them |
+| Highlight and rhyme colours | always, shifted past the edit (see [below](#analysis-lagging-behind-revisited)) | Ranges are character offsets: an edit moves the ones after it |
 
 In practice the margin doesn't flicker while typing within a line, and disappears for a
 moment after pressing Enter.
@@ -121,6 +123,30 @@ theme's primary colour, so it works the same in light and dark mode.
 
 If the selected device disappears after an edit (the new analysis doesn't contain it), the
 selection is cleared automatically.
+
+## Rhyme colouring
+
+With the brush button on (`Preferences.colorRhymes`, key `color_rhymes`), the editor draws a
+highlighter background behind each span from `AnalisisPoema.tramosDeRima` (see
+[analysis-engine.md](analysis-engine.md#rhyme-colouring-spans)):
+
+- **Colour per group**: `rhymeColor(group)` in `ui/theme/RhymeColors.kt`, from the
+  Okabe–Ito palette (orange, sky blue, bluish green, yellow, blue, vermilion, reddish
+  purple, olive), which stays distinguishable for colour-blind readers. It repeats from the
+  ninth group.
+- **Strength**: full rhymes at 26 % opacity, assonant rhymes at 12 % (34 % and 17 % in dark
+  mode, where tints are less visible). Only the rhyming ending is coloured, not the whole word.
+- The **margin letter** gets the same background, and the expanded panel shows a legend
+  with the letters in use next to the seseo chip.
+- Rhyme backgrounds are drawn first, and a selected device's highlight on top.
+
+## Analysis lagging behind, revisited
+
+Ranges (rhyme spans and device highlights) are computed on the analysed text. Instead of
+hiding them while the new analysis is on its way, `rangeShifter(old, new)` finds the single
+edited stretch (common prefix and suffix) and maps each range: ranges before the edit
+stay, ranges after it move by the length difference, and ranges touching the edit are
+hidden until the next analysis. So colours don't flicker on every keystroke.
 
 ## Scrolling to a device
 
