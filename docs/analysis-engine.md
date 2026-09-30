@@ -310,6 +310,7 @@ data class Recurso(
 | `ASINDETON` | Asyndeton |
 | `PARALELISMO` | Parallelism |
 | `ESTRIBILLO` | Refrain |
+| `RIMA_INTERNA` | Internal rhyme |
 
 Results are ordered by first line and then by type.
 
@@ -340,6 +341,19 @@ tu, su, mis, tus, sus*).
 | **Refrain** | The same line (2+ words) appears 2+ times anywhere | The whole lines |
 
 Fully identical lines don't count as anaphora or epiphora (that is a refrain).
+
+### Internal rhyme
+
+A word **inside** a line (not the last one) that makes a **full (consonant) rhyme** with:
+- another inner word of the same line (*la **luna** sobre la **laguna** se dormía*),
+- the last word of the same line (*tu **corazón** es mi **canción***), or
+- the last word of the previous or next line in the stanza (*Un **soneto** me manda
+  hacer Violante, / que en mi vida me he visto en tanto **aprieto***).
+
+It uses the same consonant key as end rhyme (so *seseo* applies: *casa / caza*). Only
+full rhymes count, because assonance happens by chance in almost any line. Unstressed
+function words, the same word repeated and one-letter endings are ignored. Each pair is
+reported once, with both words as evidence (`«soneto» · «aprieto»`) and highlighted.
 
 ### Structure detectors
 
@@ -407,7 +421,7 @@ The evidence shows how the sound is spelled: `sonido «b/v» ×4`, `sonido «z/c
 ### What it doesn't detect
 
 **Semantic** devices (metaphor, simile, personification, hyperbole, antithesis…) can't be
-reliably recognised with rules; that would need a language model. Internal rhymes,
+reliably recognised with rules; that would need a language model. Assonant internal rhymes,
 hyperbaton and onomatopoeia aren't detected either.
 
 ---
@@ -469,7 +483,7 @@ Matching is case-insensitive.
 | `SilabeadorTest` | 9 | Basic syllabification, digraphs, silent u and diaeresis, diphthongs and triphthongs, hiatus, y, consonant clusters, stress type, word extraction |
 | `MetricaTest` | 8 | *Sinalefa* (with h), final-stress rule, *dialefa* on a stressed vowel, alexandrine, final y, metre not admitted, dominant metre of a sonnet |
 | `RimaTest` | 8 | Endings, full rhymes, assonant rhymes, non-rhymes, *seseo*, sonnet and *romance* schemes, assonant/consonant merging |
-| `RecursosTest` | 14 | Each device type, alliteration in one and two lines, merging, intensity, and no false positives in well-known lines |
+| `RecursosTest` | 19 | Each device type, alliteration in one and two lines, merging, intensity, internal rhymes, and no false positives in well-known lines |
 | `AnalisisPoemaTest` | 9 | Metre and scheme of a quatrain, *arte menor*, a line that doesn't fit, offsets, empty text, highlight ranges |
 
 To add a case, use real lines of verse (by well-known authors when possible) and add a

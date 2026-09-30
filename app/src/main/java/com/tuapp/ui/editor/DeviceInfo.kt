@@ -77,6 +77,12 @@ private val EXPLANATIONS = mapOf(
         "Los suspiros son aire y van al aire.\nLas lágrimas son agua y van al mar.",
         "Gustavo Adolfo Bécquer"
     ),
+    Tipo.RIMA_INTERNA to DeviceExplanation(
+        "Rima entre una palabra del interior de un verso y otra del mismo verso o del " +
+            "final de un verso vecino. Añade ecos dentro de las líneas y es muy habitual " +
+            "en letras de canciones y en el rap. Solo se señala la rima consonante.",
+        "tu corazón es mi canción,\nla luna duerme en la laguna"
+    ),
     Tipo.ESTRIBILLO to DeviceExplanation(
         "Verso o grupo de versos que se repite a lo largo del poema o la canción. " +
             "Da unidad y es lo que más se recuerda.",

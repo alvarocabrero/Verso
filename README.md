@@ -35,7 +35,7 @@ The app's interface and analysis are in Spanish, and it is designed for Spanish 
   optional *seseo* (s = z = soft c) for Latin American or Andalusian accents. Letters are
   lowercase for short-line verse (*arte menor*, 8 syllables or fewer).
 - **Literary devices**: alliteration (clear or possible), anaphora, epiphora, anadiplosis,
-  epanadiplosis, geminatio, polysyndeton, asyndeton, parallelism and refrain.
+  epanadiplosis, geminatio, polysyndeton, asyndeton, parallelism, refrain and internal rhyme.
   Tapping one highlights its words and scrolls to it.
 - An always-visible summary: *«Endecasílabo · ABBA ABBA · 3 recursos»* (hendecasyllable,
   rhyme scheme, number of devices).
@@ -90,7 +90,7 @@ app/src/main/java/com/tuapp/
   ui/editor/           Editor with autosave and real-time analysis
   ui/theme/            "Ink on paper" theme, verse text styles and note palette
   analisis/            Analysis engine in pure Kotlin (no Android dependencies)
-app/src/test/java/com/tuapp/analisis/   JUnit tests for the engine (48)
+app/src/test/java/com/tuapp/analisis/   JUnit tests for the engine (53)
 docs/                  Technical documentation (docs/es/: Spanish copy)
 ```
 
@@ -111,7 +111,7 @@ A Spanish copy of every document is in [docs/es/](docs/es/).
   word), nor the caesura of alexandrines.
 - There is one dominant metre per poem: in polymetric poems, lines of a different length
   are shown in red.
-- There are no internal rhymes or near rhymes.
+- Internal rhymes are detected only when they are full (consonant) rhymes; there are no near rhymes.
 - Semantic devices (metaphor, simile, personification…) are not detected; that would
   need a language model.
 

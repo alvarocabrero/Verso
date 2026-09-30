@@ -30,7 +30,7 @@ aliteración, la anáfora o el paralelismo.
   fonéticas (b = v, h muda, yeísmo) y **seseo** opcional para acento latinoamericano o andaluz.
   Minúsculas en arte menor (8 sílabas o menos).
 - **Recursos literarios**: aliteración (clara o posible), anáfora, epífora, anadiplosis,
-  epanadiplosis, geminación, polisíndeton, asíndeton, paralelismo y estribillo.
+  epanadiplosis, geminación, polisíndeton, asíndeton, paralelismo, estribillo y rima interna.
   Al tocar uno se resaltan sus palabras y la pantalla se desplaza hasta él.
 - Resumen siempre visible: *«Endecasílabo · ABBA ABBA · 3 recursos»*.
 - Se puede ocultar todo el análisis con el botón **#** de la barra superior.
@@ -84,7 +84,7 @@ app/src/main/java/com/tuapp/
   ui/editor/           Editor con autoguardado y análisis en tiempo real
   ui/theme/            Tema "tinta sobre papel", estilos de verso y paleta de notas
   analisis/            Motor de análisis en Kotlin puro (sin Android)
-app/src/test/java/com/tuapp/analisis/   Tests JUnit del motor (48)
+app/src/test/java/com/tuapp/analisis/   Tests JUnit del motor (53)
 docs/                  Documentación técnica en inglés (docs/es/: en español)
 ```
 
@@ -104,7 +104,7 @@ La versión en inglés de cada documento está en [docs/](docs/).
 - No detecta diéresis ni sinéresis, ni la cesura de los alejandrinos.
 - Un solo metro dominante por poema: en poemas polimétricos, los versos de otra medida
   aparecen en rojo.
-- No hay rimas internas ni "casi rimas".
+- Las rimas internas solo se detectan si son consonantes; no hay "casi rimas".
 - Los recursos semánticos (metáfora, símil, personificación…) no se detectan: haría falta
   un modelo de lenguaje.
 

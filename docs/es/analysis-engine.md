@@ -303,6 +303,20 @@ tu, su, mis, tus, sus*).
 
 Versos completamente iguales no cuentan como anáfora ni epífora (eso es estribillo).
 
+### Rima interna
+
+Una palabra del **interior** de un verso (no la última) que rima en **consonante** con:
+- otra palabra interior del mismo verso (*la **luna** sobre la **laguna** se dormía*),
+- la última palabra del mismo verso (*tu **corazón** es mi **canción***), o
+- la última palabra del verso anterior o siguiente de la estrofa (*Un **soneto** me manda
+  hacer Violante, / que en mi vida me he visto en tanto **aprieto***).
+
+Usa la misma clave consonante que la rima final (así que el seseo cuenta: *casa / caza*).
+Solo cuenta la rima consonante, porque la asonancia aparece por azar en casi cualquier
+verso. Se ignoran las palabras átonas, la misma palabra repetida y las terminaciones de una
+sola letra. Cada pareja se señala una vez, con las dos palabras como evidencia
+(`«soneto» · «aprieto»`) y resaltadas.
+
 ### Detectores de estructura
 
 | Recurso | Condición |
@@ -372,7 +386,7 @@ La evidencia muestra la grafía del sonido: `sonido «b/v» ×4`, `sonido «z/c�
 
 Los recursos **semánticos** (metáfora, símil, personificación, hipérbole, antítesis…) no
 se pueden reconocer con reglas de forma fiable; haría falta un modelo de lenguaje. Tampoco
-hay detección de rimas internas, hipérbaton ni onomatopeyas.
+hay detección de rimas internas asonantes, hipérbaton ni onomatopeyas.
 
 ---
 
@@ -434,7 +448,7 @@ La comparación no distingue mayúsculas.
 | `SilabeadorTest` | 9 | Silabeo básico, dígrafos, u muda y diéresis, diptongos y triptongos, hiatos, y griega, grupos consonánticos, tipo acentual, extracción de palabras |
 | `MetricaTest` | 8 | Sinalefa (con h), ley del acento final, dialefa en vocal tónica, alejandrino, y final, metro no admitido, metro dominante de un soneto |
 | `RimaTest` | 8 | Terminaciones, consonantes, asonantes, no rimas, seseo, esquemas de soneto y romance, fusión asonante/consonante |
-| `RecursosTest` | 14 | Cada tipo de recurso, aliteración en uno y dos versos, fusión, intensidad y ausencia de falsos positivos en versos conocidos |
+| `RecursosTest` | 19 | Cada tipo de recurso, aliteración en uno y dos versos, fusión, intensidad, rimas internas y ausencia de falsos positivos en versos conocidos |
 | `AnalisisPoemaTest` | 9 | Metro y esquema de un cuarteto, arte menor, verso que no encaja, posiciones, texto vacío, rangos de resaltado |
 
 Para añadir un caso: usa versos reales (de autores conocidos cuando sea posible) y anota

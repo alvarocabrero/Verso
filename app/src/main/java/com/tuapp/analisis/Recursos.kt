@@ -17,7 +17,8 @@ object Recursos {
         POLISINDETON("Polisíndeton", "Uso repetido de conjunciones"),
         ASINDETON("Asíndeton", "Enumeración sin conjunciones"),
         PARALELISMO("Paralelismo", "Versos consecutivos con la misma estructura"),
-        ESTRIBILLO("Estribillo", "Verso que se repite a lo largo del texto")
+        ESTRIBILLO("Estribillo", "Verso que se repite a lo largo del texto"),
+        RIMA_INTERNA("Rima interna", "Una palabra dentro del verso rima con otra del mismo verso o con el final de un verso vecino")
     }
 
     /**
@@ -58,6 +59,7 @@ object Recursos {
             out += anadiplosis(b, pal)
             out += paralelismo(b, pal)
             out += aliteraciones(b, lineas, seseo)
+            out += rimasInternas(b, lineas, seseo)
         }
         pal.forEachIndexed { i, w ->
             if (w.isEmpty()) return@forEachIndexed
@@ -173,6 +175,60 @@ object Recursos {
                 segs.last().first() !in CONJUNCIONES &&
                 segs.distinct().size > 1                  // "palabras, palabras, palabras" es geminación
         return if (ok) Recurso(Tipo.ASINDETON, listOf(i), "${segs.size} elementos sin conjunción") else null
+    }
+
+    // ---------- Rima interna ----------
+
+    /**
+     * Rimas consonantes en las que interviene una palabra del interior de un verso:
+     * - con otra palabra interior del mismo verso (la luna en la laguna),
+     * - con la palabra final del mismo verso (mi corazón es tu canción),
+     * - con la palabra final del verso anterior o del siguiente.
+     * Solo cuenta la rima consonante: la asonante aparece por azar en casi cualquier
+     * verso. Se ignoran las palabras átonas, la misma palabra repetida y las
+     * terminaciones de una sola letra.
+     */
+    private fun rimasInternas(b: List<Int>, lineas: List<String>, seseo: Boolean): List<Recurso> {
+        class Pal(val texto: String, val clave: String?)
+
+        fun palabras(li: Int) = Silabeador.palabrasDe(lineas[li]).map { p ->
+            val clave = if (p.lowercase() in ATONOS) null
+                        else Rima.terminacion(p, seseo)?.consonante?.takeIf { it.length >= 2 }
+            Pal(p, clave)
+        }
+
+        val porLinea = b.associateWith { palabras(it) }
+        val res = mutableListOf<Recurso>()
+        val vistos = mutableSetOf<Set<String>>()
+
+        fun anadir(lineasRecurso: List<Int>, a: Pal, c: Pal) {
+            if (a.texto.lowercase() == c.texto.lowercase()) return
+            val par = setOf("${lineasRecurso.first()}:${a.texto.lowercase()}", "${lineasRecurso.last()}:${c.texto.lowercase()}")
+            if (!vistos.add(par)) return
+            res += Recurso(Tipo.RIMA_INTERNA, lineasRecurso, "«${a.texto}» · «${c.texto}»", listOf(a.texto, c.texto))
+        }
+
+        b.forEachIndexed { k, li ->
+            val ps = porLinea.getValue(li)
+            if (ps.size < 2) return@forEachIndexed
+            val interiores = ps.dropLast(1).filter { it.clave != null }
+            val final = ps.last()
+
+            // Dentro del mismo verso: interior con interior, interior con final
+            interiores.forEachIndexed { i, a ->
+                interiores.drop(i + 1).filter { it.clave == a.clave }.forEach { c -> anadir(listOf(li), a, c) }
+                if (final.clave != null && final.clave == a.clave) anadir(listOf(li), a, final)
+            }
+            // Con el final de los versos vecinos de la misma estrofa
+            listOfNotNull(b.getOrNull(k - 1), b.getOrNull(k + 1)).forEach { otro ->
+                val finalOtro = porLinea.getValue(otro).lastOrNull() ?: return@forEach
+                if (finalOtro.clave == null) return@forEach
+                interiores.filter { it.clave == finalOtro.clave }.forEach { a ->
+                    anadir(listOf(li, otro).sorted(), a, finalOtro)
+                }
+            }
+        }
+        return res
     }
 
     // ---------- Estructura ----------

@@ -119,4 +119,47 @@ class RecursosTest {
         assertEquals(emptyList<Tipo>(), tipos("Caminante, no hay camino"))
         assertEquals(emptyList<Tipo>(), tipos("Puedo escribir los versos más tristes esta noche"))
     }
+
+    // ---------- Rima interna ----------
+
+    private fun rimasInternas(vararg lineas: String) =
+        Recursos.detectar(lineas.toList()).filter { it.tipo == RIMA_INTERNA }
+
+    @Test fun rimaInternaConElFinalDelVerso() {
+        val r = rimasInternas("tu corazón es mi canción")
+        assertEquals(1, r.size)
+        assertEquals(listOf(0), r[0].lineas)
+        assertEquals(listOf("corazón", "canción"), r[0].palabras)
+    }
+
+    @Test fun rimaInternaDentroDelVerso() {
+        // luna / laguna: las dos en el interior del verso
+        val r = rimasInternas("la luna sobre la laguna se dormía")
+        assertEquals(listOf(listOf("luna", "laguna")), r.map { it.palabras })
+    }
+
+    @Test fun rimaInternaConElVersoVecino() {
+        // Lope: "soneto", dentro del primer verso, rima con "aprieto", final del segundo
+        val r = rimasInternas(
+            "Un soneto me manda hacer Violante,",
+            "que en mi vida me he visto en tanto aprieto;"
+        )
+        assertEquals(1, r.size)
+        assertEquals(listOf(0, 1), r[0].lineas)
+        assertEquals("«soneto» · «aprieto»", r[0].evidencia)
+    }
+
+    @Test fun rimaInternaConSeseo() {
+        assertTrue(rimasInternas("la casa junto a la caza").isEmpty())
+        val r = Recursos.detectar(listOf("la casa junto a la caza"), seseo = true)
+        assertEquals(listOf(RIMA_INTERNA), r.map { it.tipo })
+    }
+
+    @Test fun rimaInternaNoCuentaRepeticionesNiAsonancias() {
+        assertTrue(rimasInternas("verde que te quiero verde").isEmpty())    // misma palabra
+        assertTrue(rimasInternas("la casa blanca de la plaza").isEmpty())  // asonante: casa / plaza
+        assertTrue(rimasInternas("el perro y el gato en la noche").isEmpty())
+        assertTrue(rimasInternas(                                           // estrofas distintas
+            "tu corazón late despacio", "", "y suena la canción").isEmpty())
+    }
 }
