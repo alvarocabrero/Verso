@@ -12,6 +12,8 @@ text analysis: metrical syllables per line, rhymes and literary devices.
 - Everything the user sees (UI text, analysis results, content descriptions) is in **Spanish**.
 - Docs: `README.md` (English, shown by GitHub) and `README.es.md` (Spanish); `docs/` in
   English with a Spanish copy in `docs/es/` (same file names). Keep both languages in sync.
+- `CHANGELOG.md` / `CHANGELOG.es.md`: add user-visible changes under "Unreleased"; on release,
+  rename that section to the version and date.
 - Repository: https://github.com/alvarocabrero/Verso (branch `main`).
 
 ## Status

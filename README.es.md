@@ -7,7 +7,8 @@
 Verso funciona como un Google Keep sencillo (notas en cuadrícula, colores, fijar, buscar), pero
 con un rasgo propio: **analiza lo que escribes mientras lo escribes**. Cuenta las sílabas
 métricas de cada verso, detecta el esquema de rima y señala recursos literarios como la
-aliteración, la anáfora o el paralelismo.
+aliteración, la anáfora o el paralelismo. Además guarda **notas de voz y maquetas**: se graban
+en la app o se adjuntan audios, y se vinculan a las notas a las que pertenecen.
 
 <p align="center">
   <img src="docs/screenshots/editor-margin.png" width="240" alt="Editor con sílabas y rimas al margen">
@@ -22,6 +23,7 @@ aliteración, la anáfora o el paralelismo.
   de papel (con variante nocturna).
 - Fijar notas arriba, búsqueda por título y contenido, cuadrícula escalonada.
 - Autoguardado: sin botón de guardar; una nota que se deja vacía se descarta.
+
 **Audios**
 - Una segunda sección, que se cambia desde la barra de abajo: **Notas** / **Audios**.
 - **Grabar** ideas en la app (con pausa) o **adjuntar** audios del móvil (mp3, m4a, wav,
@@ -30,7 +32,7 @@ aliteración, la anáfora o el paralelismo.
 - **Vincular** audios y notas, de muchos a muchos: una canción puede tener varias maquetas y
   una maqueta puede estar en varias canciones. El editor muestra los audios de la nota y las
   tarjetas un 🎧 con el número.
-
+- Todo se queda en el móvil: los audios no se suben a ningún sitio.
 
 **Análisis en tiempo real, en el editor**
 - **Sílabas métricas** a la derecha de cada verso, ajustadas al metro dominante del poema
@@ -41,6 +43,8 @@ aliteración, la anáfora o el paralelismo.
 - **Recursos literarios**: aliteración (clara o posible), anáfora, epífora, anadiplosis,
   epanadiplosis, geminación, polisíndeton, asíndeton, paralelismo, estribillo y rima interna.
   Al tocar uno se resaltan sus palabras y la pantalla se desplaza hasta él.
+- Un **botón ⓘ** junto a cada recurso explica qué es, con un ejemplo clásico, dónde se ha
+  encontrado y, en las aliteraciones, por qué cuenta como clara o posible.
 - Resumen siempre visible: *«Endecasílabo · ABBA ABBA · 3 recursos»*.
 - **Colorear rimas** (botón del pincel): cada grupo de rima tiene su color de rotulador en la
   terminación que rima, más suave en las asonantes; las rimas internas toman el color de su grupo.
@@ -51,6 +55,11 @@ aliteración, la anáfora o el paralelismo.
 La última versión firmada está en
 [Releases](https://github.com/alvarocabrero/Verso/releases/latest): descarga el `.apk` en
 el móvil y permite instalar apps de ese origen cuando Android lo pida.
+
+La versión publicada es la **0.1.0**. Todo lo añadido después (audios, colorear rimas, rima
+interna, las explicaciones ⓘ) está en `main` y saldrá en la 0.2.0; mientras tanto, se puede
+compilar desde el código (ver abajo). Los cambios de cada versión están en el
+[registro de cambios](CHANGELOG.es.md).
 
 ## Requisitos
 
@@ -107,10 +116,11 @@ docs/                  Documentación técnica en inglés (docs/es/: en español
 
 | Documento | Contenido |
 |---|---|
-| [Arquitectura](docs/es/architecture.md) | Capas, flujo de datos, autoguardado, hilos, navegación |
+| [Arquitectura](docs/es/architecture.md) | Capas, flujo de datos, autoguardado, hilos, navegación, audios (grabar, importar, vincular) |
 | [Motor de análisis](docs/es/analysis-engine.md) | Silabeo, métrica, rima y recursos: reglas, algoritmos y API |
 | [Editor](docs/es/editor.md) | Cómo se integra el análisis en la interfaz: margen, resaltado, panel |
 | [Desarrollo](docs/es/development.md) | Entorno, compilación, tests, emulador, publicación, convenciones y resolución de problemas |
+| [Registro de cambios](CHANGELOG.es.md) | Qué cambió en cada versión |
 
 La versión en inglés de cada documento está en [docs/](docs/).
 

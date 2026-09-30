@@ -7,7 +7,8 @@
 Verso works like a simple Google Keep (notes in a grid, colours, pinning, search), with one
 distinctive feature: **it analyses what you write as you write it**. It counts the metrical
 syllables of each line, detects the rhyme scheme and points out literary devices such as
-alliteration, anaphora or parallelism.
+alliteration, anaphora or parallelism. It also keeps **voice memos and demos**: record
+them in the app or attach audio files, and link them to the notes they belong to.
 
 The app's interface and analysis are in Spanish, and it is designed for Spanish verse.
 
@@ -24,6 +25,7 @@ The app's interface and analysis are in Spanish, and it is designed for Spanish 
   colours (each with a dark variant).
 - Pin notes to the top, search by title and content, staggered grid.
 - Autosave: there is no save button, and a note left empty is discarded.
+
 **Audios**
 - A second section, switched from the bottom bar: **Notas** / **Audios**.
 - **Record** ideas in the app (with pause) or **attach** audio files from the phone (mp3,
@@ -31,7 +33,7 @@ The app's interface and analysis are in Spanish, and it is designed for Spanish 
 - Play them in place with a seek bar, **rename** and delete them.
 - **Link** audios and notes, many to many: a song can have several demos and a demo can
   belong to several songs. The editor shows a note's audios; note cards show 🎧 and a count.
-
+- Everything stays on the phone: audios are not uploaded anywhere.
 
 **Real-time analysis in the editor**
 - **Metrical syllables** to the right of each line, fitted to the poem's dominant metre.
@@ -45,6 +47,8 @@ The app's interface and analysis are in Spanish, and it is designed for Spanish 
 - **Literary devices**: alliteration (clear or possible), anaphora, epiphora, anadiplosis,
   epanadiplosis, geminatio, polysyndeton, asyndeton, parallelism, refrain and internal rhyme.
   Tapping one highlights its words and scrolls to it.
+- An **ⓘ button** next to each device explains what it is, with a classic example, where it
+  was found and, for alliterations, why it counts as clear or possible.
 - An always-visible summary: *«Endecasílabo · ABBA ABBA · 3 recursos»* (hendecasyllable,
   rhyme scheme, number of devices).
 - **Rhyme colouring** (brush button): each rhyme group gets its own highlighter colour on the
@@ -56,6 +60,11 @@ The app's interface and analysis are in Spanish, and it is designed for Spanish 
 The latest signed build is in
 [Releases](https://github.com/alvarocabrero/Verso/releases/latest). Download the `.apk` on
 your phone and allow installing apps from that source when Android asks.
+
+The published release is **0.1.0**. Everything added since (audios, rhyme colouring,
+internal rhyme, the ⓘ explanations) is on `main` and will ship in 0.2.0; until then, build
+it from source (see below). What changed in each version is in the
+[changelog](CHANGELOG.md).
 
 ## Requirements
 
@@ -112,10 +121,11 @@ docs/                  Technical documentation (docs/es/: Spanish copy)
 
 | Document | Contents |
 |---|---|
-| [Architecture](docs/architecture.md) | Layers, data flow, autosave, threading, navigation |
+| [Architecture](docs/architecture.md) | Layers, data flow, autosave, threading, navigation, audios (recording, import, links) |
 | [Analysis engine](docs/analysis-engine.md) | Syllabification, metre, rhyme and literary devices: rules, algorithms and API |
 | [Editor](docs/editor.md) | How the analysis is shown in the UI: margin, highlighting, panel |
 | [Development](docs/development.md) | Environment, build, tests, emulator, releases, conventions, troubleshooting |
+| [Changelog](CHANGELOG.md) | What changed in each version |
 
 A Spanish copy of every document is in [docs/es/](docs/es/).
 
