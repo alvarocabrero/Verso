@@ -31,6 +31,8 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ExpandLess
 import androidx.compose.material.icons.filled.ExpandMore
+import androidx.compose.material.icons.outlined.Info
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
@@ -320,6 +322,7 @@ fun AnalysisPanel(
 @Composable
 private fun DeviceRow(d: Recursos.Recurso, numbers: List<Int?>, selected: Boolean, onClick: () -> Unit) {
     val colors = MaterialTheme.colorScheme
+    var showInfo by remember { mutableStateOf(false) }
     val verses = d.lineas.mapNotNull { numbers.getOrNull(it) }
     val where = when {
         verses.isEmpty() -> ""
@@ -328,20 +331,31 @@ private fun DeviceRow(d: Recursos.Recurso, numbers: List<Int?>, selected: Boolea
         else -> "versos " + verses.joinToString(", ")
     }
     val degree = if (d.tipo == Recursos.Tipo.ALITERACION) (if (d.clara) " · clara" else " · posible") else ""
-    Column(
-        Modifier
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        modifier = Modifier
             .fillMaxWidth()
             .background(if (selected) colors.secondaryContainer else Color.Transparent)
             .clickable(onClick = onClick)
-            .padding(horizontal = 16.dp, vertical = 8.dp)
+            .padding(start = 16.dp, end = 4.dp, top = 4.dp, bottom = 4.dp)
     ) {
-        Text(d.tipo.nombre + degree, style = MaterialTheme.typography.titleSmall)
-        Text(
-            listOf(where, d.evidencia).filter { it.isNotEmpty() }.joinToString(" · "),
-            style = MaterialTheme.typography.bodySmall,
-            color = colors.onSurfaceVariant
-        )
+        Column(Modifier.weight(1f).padding(vertical = 4.dp)) {
+            Text(d.tipo.nombre + degree, style = MaterialTheme.typography.titleSmall)
+            Text(
+                listOf(where, d.evidencia).filter { it.isNotEmpty() }.joinToString(" · "),
+                style = MaterialTheme.typography.bodySmall,
+                color = colors.onSurfaceVariant
+            )
+        }
+        IconButton(onClick = { showInfo = true }) {
+            Icon(
+                Icons.Outlined.Info,
+                contentDescription = "Qué es: ${d.tipo.nombre}",
+                tint = colors.onSurfaceVariant
+            )
+        }
     }
+    if (showInfo) DeviceInfoDialog(d, where) { showInfo = false }
 }
 
 /** Panel header, shown in Spanish: "Endecasílabo · ABBA · 3 recursos". */

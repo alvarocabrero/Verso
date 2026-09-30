@@ -35,6 +35,10 @@ está en [analysis-engine.md](analysis-engine.md); el ciclo de vida de la nota, 
   de seseo y la lista de recursos (tipo, *clara/posible* en aliteraciones, versos y
   evidencia). Tocar un recurso lo resalta y lleva la pantalla a su primer verso; tocarlo
   otra vez lo quita.
+- **Botón ⓘ** en cada recurso: abre un diálogo con qué es el recurso, un ejemplo clásico
+  (Darío, Machado, Bécquer, Lope, Lorca, Hernández…), dónde se ha encontrado en el texto
+  y, en las aliteraciones, cuántas veces más de lo normal aparece el sonido y por qué
+  cuenta como clara o posible. Los textos están en `ui/editor/DeviceInfo.kt`.
 - **Botón #** (barra superior): muestra u oculta todo el análisis. Se recuerda entre
   sesiones.
 
@@ -49,6 +53,7 @@ Todos en `ui/editor/`.
 | `VerseMargin` | `AnalysisEditor.kt` | Sílabas y letra de rima alineadas con cada verso |
 | `drawHighlight` | `AnalysisEditor.kt` | Fondo, subrayado o punteado bajo las palabras de un recurso |
 | `AnalysisPanel` / `DeviceRow` | `AnalysisEditor.kt` | Resumen desplegable, seseo y lista de recursos |
+| `DeviceInfoDialog` | `DeviceInfo.kt` | Explicación, ejemplo y detalles de la detección de un recurso |
 | `highlightFor` | `AnalysisEditor.kt` | Traduce un `Recurso` a rangos y estilo de resaltado |
 
 ## Por qué un solo scroll

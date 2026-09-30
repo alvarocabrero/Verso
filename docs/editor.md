@@ -34,6 +34,10 @@ is in [analysis-engine.md](analysis-engine.md); the note's lifecycle, in
 - **Panel**: summary *metre · scheme · devices*. Tapping it expands the seseo setting and
   the list of devices (type, *clara/posible* for alliterations, lines and evidence). Tapping
   a device highlights it and scrolls to its first line; tapping it again clears it.
+- **ⓘ button** on each device row: opens a dialog with what the device is, a classic
+  example (Darío, Machado, Bécquer, Lope, Lorca, Hernández…), where it was found in the
+  text and, for alliterations, how many times more frequent than usual the sound is and
+  why it counts as clear or possible. The texts live in `ui/editor/DeviceInfo.kt`.
 - **# button** (top bar): shows or hides the whole analysis. Remembered across sessions.
 
 All user-facing text is in Spanish.
@@ -49,6 +53,7 @@ All in `ui/editor/`.
 | `VerseMargin` | `AnalysisEditor.kt` | Syllables and rhyme letter aligned with each line |
 | `drawHighlight` | `AnalysisEditor.kt` | Background, underline or dotted line under a device's words |
 | `AnalysisPanel` / `DeviceRow` | `AnalysisEditor.kt` | Expandable summary, seseo and device list |
+| `DeviceInfoDialog` | `DeviceInfo.kt` | Explanation, example and detection details of a device |
 | `highlightFor` | `AnalysisEditor.kt` | Turns a `Recurso` into ranges and a highlight style |
 
 ## Why a single scroll
