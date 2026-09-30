@@ -24,6 +24,14 @@ The app's interface and analysis are in Spanish, and it is designed for Spanish 
   colours (each with a dark variant).
 - Pin notes to the top, search by title and content, staggered grid.
 - Autosave: there is no save button, and a note left empty is discarded.
+**Audios**
+- A second section, switched from the bottom bar: **Notas** / **Audios**.
+- **Record** ideas in the app (with pause) or **attach** audio files from the phone (mp3,
+  m4a, wav, ogg, flac…); imported files are copied into the app.
+- Play them in place with a seek bar, **rename** and delete them.
+- **Link** audios and notes, many to many: a song can have several demos and a demo can
+  belong to several songs. The editor shows a note's audios; note cards show 🎧 and a count.
+
 
 **Real-time analysis in the editor**
 - **Metrical syllables** to the right of each line, fitted to the poem's dominant metre.
@@ -86,13 +94,17 @@ The full environment guide (JDK, SDK, emulator on Windows) is in
 ```
 app/src/main/java/com/tuapp/
   VersoApp.kt          Application: hand-rolled dependency container (no Hilt)
-  MainActivity.kt      Navigation: note list and editor
-  data/                Room (Note, NoteDao, VersoDatabase), repository and preferences
-  ui/notes/            Home screen: search and card grid
+  MainActivity.kt      Navigation: home (notes / audios) and editor
+  data/                Room (Note, Audio, NoteAudio, DAOs, VersoDatabase), repositories and preferences
+  audio/               Recorder, player and audio formatting helpers
+  ui/home/             Home screen with the bottom bar
+  ui/notes/            Notes section: search and card grid
+  ui/audios/           Audios section: list, player, recording, import, links
   ui/editor/           Editor with autosave and real-time analysis
   ui/theme/            "Ink on paper" theme, verse text styles and note palette
   analisis/            Analysis engine in pure Kotlin (no Android dependencies)
 app/src/test/java/com/tuapp/analisis/   JUnit tests for the engine (57)
+app/src/test/java/com/tuapp/audio/      JUnit tests for the audio helpers (5)
 docs/                  Technical documentation (docs/es/: Spanish copy)
 ```
 
@@ -119,6 +131,7 @@ A Spanish copy of every document is in [docs/es/](docs/es/).
 
 ## Roadmap
 
+- Recording in the background (with the screen locked), and recording straight from a note.
 - Tags, and a trash bin with undo.
 - Export and share (text, image).
 - Metre per stanza for polymetric poems.

@@ -39,6 +39,20 @@ import androidx.compose.material.icons.outlined.Palette
 import androidx.compose.material.icons.outlined.PushPin
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilterChip
+import androidx.compose.material3.AssistChip
+import androidx.compose.material3.AssistChipDefaults
+import androidx.compose.material3.ModalBottomSheet
+import androidx.compose.material3.TextButton
+import androidx.compose.material.icons.outlined.Headphones
+import androidx.compose.material.icons.outlined.Link
+import androidx.compose.material.icons.outlined.LinkOff
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.navigationBarsPadding
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -62,7 +76,11 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.tuapp.audio.AudioFormat
+import com.tuapp.data.Audio
 import com.tuapp.data.NoteType
+import com.tuapp.ui.audios.AudioRow
+import com.tuapp.ui.audios.LinkDialog
 import com.tuapp.ui.theme.NotePalette
 import com.tuapp.ui.theme.VerseStyle
 import com.tuapp.ui.theme.noteBackground
@@ -74,6 +92,8 @@ fun EditorScreen(
     vm: EditorViewModel = viewModel(factory = EditorViewModel.Factory)
 ) {
     var showColors by remember { mutableStateOf(false) }
+    var showAudios by remember { mutableStateOf(false) }
+    val noteAudios by vm.noteAudios.collectAsStateWithLifecycle()
 
     Scaffold(
         containerColor = noteBackground(vm.color),
@@ -165,6 +185,15 @@ fun EditorScreen(
                             label = { Text(t.label) }
                         )
                     }
+                    val audioCount = noteAudios.size
+                    AssistChip(
+                        onClick = { showAudios = true },
+                        label = { Text(if (audioCount == 0) "Audios" else if (audioCount == 1) "1 audio" else "$audioCount audios") },
+                        leadingIcon = {
+                            Icon(Icons.Outlined.Headphones, contentDescription = null,
+                                modifier = Modifier.size(AssistChipDefaults.IconSize))
+                        }
+                    )
                 }
 
                 TextField(
@@ -200,6 +229,7 @@ fun EditorScreen(
             )
         }
     }
+    if (showAudios) NoteAudiosSheet(vm, noteAudios, onDismiss = { showAudios = false })
 }
 
 @Composable
@@ -244,3 +274,64 @@ private fun transparentFieldColors() = TextFieldDefaults.colors(
     focusedIndicatorColor = Color.Transparent,
     unfocusedIndicatorColor = Color.Transparent
 )
+
+/** The note's audios: play them, unlink them, or link more. */
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun NoteAudiosSheet(vm: EditorViewModel, audios: List<Audio>, onDismiss: () -> Unit) {
+    val playback by vm.player.state.collectAsStateWithLifecycle()
+    val all by vm.allAudios.collectAsStateWithLifecycle()
+    var linking by remember { mutableStateOf(false) }
+
+    ModalBottomSheet(onDismissRequest = onDismiss) {
+        Column(Modifier.fillMaxWidth().navigationBarsPadding().padding(bottom = 16.dp)) {
+            Text(
+                "Audios de la nota",
+                style = MaterialTheme.typography.titleMedium,
+                modifier = Modifier.padding(horizontal = 24.dp, vertical = 8.dp)
+            )
+            if (audios.isEmpty()) {
+                Text(
+                    "Esta nota no tiene audios. Vincula grabaciones o archivos de la sección Audios.",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier.padding(horizontal = 24.dp, vertical = 8.dp)
+                )
+            } else {
+                LazyColumn(Modifier.heightIn(max = 420.dp)) {
+                    items(audios, key = { it.id }) { audio ->
+                        AudioRow(
+                            audio = audio,
+                            playback = playback,
+                            onTogglePlay = { vm.togglePlay(audio) },
+                            onSeek = vm::seek,
+                            trailing = {
+                                IconButton(onClick = { vm.unlinkAudio(audio) }) {
+                                    Icon(Icons.Outlined.LinkOff, contentDescription = "Desvincular «${audio.name}»")
+                                }
+                            }
+                        )
+                    }
+                }
+            }
+            TextButton(
+                onClick = { linking = true },
+                modifier = Modifier.padding(horizontal = 16.dp)
+            ) {
+                Icon(Icons.Outlined.Link, contentDescription = null)
+                Spacer(Modifier.width(8.dp))
+                Text("Vincular audios")
+            }
+        }
+    }
+    if (linking) LinkDialog(
+        title = "Vincular audios",
+        empty = "Todavía no tienes audios. Grábalos o añádelos desde la sección Audios.",
+        items = all,
+        key = { it.id },
+        label = { "${it.name} · ${AudioFormat.duration(it.durationMs)}" },
+        selected = audios.map { it.id }.toSet(),
+        onConfirm = { vm.setAudioLinks(it); linking = false },
+        onDismiss = { linking = false }
+    )
+}

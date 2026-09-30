@@ -22,13 +22,24 @@ capas con dependencias en un solo sentido:
 
 | Archivo | Papel |
 |---|---|
-| `VersoApp.kt` | `Application`. Crea la base de datos, el repositorio, las preferencias y `appScope` |
+| `VersoApp.kt` | `Application`. Crea la base de datos, los repositorios, las preferencias, el reproductor de audio y `appScope` |
 | `MainActivity.kt` | Única actividad. Aplica el tema y define la navegación |
 | `data/Note.kt` | Entidad Room `Note`, enum `NoteType` y sus `Converters` |
 | `data/NoteDao.kt` | Consultas: todas, búsqueda, obtener, insertar, actualizar, borrar |
-| `data/VersoDatabase.kt` | Base de datos Room `verso.db` (versión 1) |
+| `data/Audio.kt` | Entidades Room `Audio` y `NoteAudio` (vínculo nota ↔ audio) y clases de resultados |
+| `data/AudioDao.kt` | Consultas de audios: lista, búsqueda, renombrar, borrar, vincular/desvincular, audios de una nota, recuentos |
+| `data/AudioRepository.kt` | Archivos de audio en `files/audios/`: archivos de grabación, importar desde un `Uri`, duración, borrar |
+| `data/VersoDatabase.kt` | Base de datos Room `verso.db` (versión 2) y `MIGRATION_1_2` |
 | `data/NotesRepository.kt` | Fachada sobre el DAO: `save()` inserta o actualiza |
-| `data/Preferences.kt` | Ajustes como estado de Compose: seseo y mostrar análisis |
+| `data/Preferences.kt` | Ajustes como estado de Compose: seseo, mostrar análisis, colorear rimas, sección de inicio |
+| `audio/AudioRecorder.kt` | Envoltorio de `MediaRecorder`: AAC/m4a, pausa y continuar, tiempo transcurrido, nivel de entrada |
+| `audio/AudioPlayer.kt` | Envoltorio de `MediaPlayer` para toda la app con un `StateFlow<PlaybackState>`; un audio a la vez |
+| `audio/AudioFormat.kt` | Utilidades puras (con tests en la JVM): duraciones, fechas, nombres de grabación y de archivo |
+| `ui/home/HomeScreen.kt` | Barra de abajo con las secciones Notas / Audios |
+| `ui/audios/AudiosScreen.kt` | Lista de audios, menú de añadir (grabar / desde el dispositivo), panel de grabación, diálogos |
+| `ui/audios/AudiosViewModel.kt` | Lista y búsqueda de audios, reproducción, grabación, importar, renombrar, borrar, vínculos |
+| `ui/audios/AudioComponents.kt` | `AudioRow` compartido (fila con reproductor) y diálogos de renombrar, confirmar y vincular |
+| `ui/components/SearchField.kt` | Buscador compartido por las dos secciones |
 | `ui/notes/NotesViewModel.kt` | Búsqueda con debounce y lista de notas como `StateFlow` |
 | `ui/notes/NotesScreen.kt` | Barra de búsqueda, cuadrícula escalonada, tarjetas, estado vacío |
 | `ui/editor/EditorViewModel.kt` | Estado de la nota, autoguardado y análisis en segundo plano |
@@ -48,6 +59,8 @@ class VersoApp : Application() {
     val database by lazy { VersoDatabase.create(this) }
     val repository by lazy { NotesRepository(database.noteDao()) }
     val preferences by lazy { Preferences(this) }
+    val audioRepository by lazy { AudioRepository(database.audioDao(), this) }
+    val audioPlayer by lazy { AudioPlayer() }
 }
 ```
 
@@ -61,7 +74,7 @@ créala como `lazy` en `VersoApp` y pásala en el `initializer` del ViewModel qu
 
 | Ruta | Pantalla | Notas |
 |---|---|---|
-| `notes` | `NotesScreen` | Inicio |
+| `home` | `HomeScreen` (Notas / Audios) | Inicio; se recuerda la sección |
 | `editor/{id}` | `EditorScreen` | `id` es `Long`; `0` significa nota nueva |
 
 El editor lee `id` desde su `SavedStateHandle`. Al volver se usa `navigateUp()`.
@@ -92,9 +105,29 @@ data class Note(
   recientes).
 - Búsqueda: `LIKE '%texto%'` sobre título y contenido. `LIKE` en SQLite no distingue
   mayúsculas solo en letras ASCII, no en las que llevan tilde.
-- `exportSchema = false` y versión 1. **Cualquier cambio en `Note` necesita subir la
-  versión y escribir una `Migration`**; si no, la app fallará al abrirse en instalaciones
+- Versión 2, con el esquema exportado en `app/schemas/`. **Cualquier cambio en las entidades
+  necesita subir la
+  versión y escribir una `Migration`** (ver `MIGRATION_1_2`); si no, la app fallará al abrirse en instalaciones
   existentes. Ver [development.md](development.md#cómo-cambiar-el-modelo-de-datos).
+
+### Audios (versión 2, 0.2.0)
+
+```kotlin
+@Entity(tableName = "audios")
+data class Audio(id: Long, name: String, fileName: String, durationMs: Long, created: Long)
+
+@Entity(tableName = "note_audios", primaryKeys = ["note_id", "audio_id"], /* FKs, CASCADE */)
+data class NoteAudio(noteId: Long, audioId: Long)
+```
+
+- **Varios a varios**: una nota puede tener varios audios y un audio varias notas. Las dos
+  claves foráneas usan `ON DELETE CASCADE`: borrar una nota o un audio quita sus vínculos
+  (nunca el otro lado).
+- `MIGRATION_1_2` solo crea las dos tablas nuevas; la de notas no se toca. Se comprobó
+  instalando la 0.2.0 encima de la 0.1.0 con notas.
+- Los archivos están en el almacenamiento privado de la app (`files/audios/<uuid>.<ext>`); la
+  tabla guarda el nombre del archivo. Los importados se **copian**, así que sobreviven si se
+  borra el original. Borrar un audio borra su archivo.
 
 ## Pantalla de notas
 
@@ -133,6 +166,34 @@ Dos detalles evitan notas duplicadas:
   cancela justo mientras Room inserta, el `id` nuevo no se pierde y el siguiente
   guardado actualiza en vez de insertar otra vez.
 
+## Audios
+
+**Grabación** (`AudioRecorder`, manejado por `AudiosViewModel`): AAC en un archivo `.m4a`,
+mono, 44,1 kHz, 128 kbps (alrededor de 1 MB por minuto). El panel de grabación consulta el
+tiempo transcurrido y el nivel de entrada cada 100 ms. Cuando la app pasa a segundo plano
+(`ON_STOP`) la grabación se **pone en pausa**, no se pierde; al volver se puede continuar o
+guardar. Si la pantalla se destruye mientras graba, se guarda lo grabado. Las grabaciones
+reciben un nombre automático (`AudioFormat.recordingName`: "Grabación 30 sep 21:22"). El
+permiso `RECORD_AUDIO` se pide la primera vez.
+
+**Importar**: el selector del sistema (`OpenDocument`, `audio/*`); después
+`AudioRepository.import` copia el archivo, usa como nombre el del archivo sin extensión
+("maqueta_final.mp3" → "maqueta final") y lee la duración con `MediaMetadataRetriever`. Los
+archivos que Android no puede leer como audio se rechazan con un mensaje.
+
+**Reproducción**: un único `AudioPlayer` en `VersoApp`, compartido por la lista de audios y
+el editor, así que al empezar un audio se para el otro. Expone `PlaybackState` (id del audio,
+si suena, posición, duración) como `StateFlow` y actualiza la posición cada 200 ms.
+
+**Vincular**:
+- Desde la lista de audios: ⋮ → *Vincular a notas* (lista con casillas); cada fila muestra
+  sus notas como chips que las abren.
+- Desde el editor: el chip *Audios* abre un panel con los audios de la nota (escuchar,
+  desvincular) y *Vincular audios*. Vincular en una nota nueva la guarda antes para que
+  tenga id.
+- Una nota sin texto pero con audios **se conserva** (no está "vacía"); su tarjeta dice
+  *Sin texto*. Las tarjetas muestran 🎧 y el número de audios.
+
 ## Análisis en segundo plano
 
 El análisis se recalcula en el ViewModel a partir del estado de Compose:
@@ -160,6 +221,8 @@ como estado de Compose, así que cambiarlo redibuja la interfaz y dispara el an�
 |---|---|---|---|
 | `seseo` | `seseo` | `false` | s = z = c(e,i) en rimas y aliteraciones |
 | `mostrar_analisis` | `showAnalysis` | `true` | Margen, panel y cálculo del análisis |
+| `color_rhymes` | `colorRhymes` | `false` | Colorear las rimas en el editor |
+| `home_tab` | `homeTab` | `0` | Sección de inicio: 0 notas, 1 audios |
 
 Las claves conservan sus nombres de la 0.1.0. Los ajustes son globales, no de cada nota.
 
@@ -171,6 +234,8 @@ Las claves conservan sus nombres de la 0.1.0. Los ajustes son globales, no de ca
 | Análisis del texto | `Dispatchers.Default`, con debounce de 300 ms |
 | Guardado al salir | `appScope` (`Dispatchers.Default`) |
 | Dibujo del margen y resaltado | Hilo principal, a partir del resultado ya calculado |
+| Importar y borrar archivos de audio | `Dispatchers.IO` |
+| Posición de reproducción, medidor de grabación | Hilo principal, consultados cada 200 / 100 ms |
 
 ## Tema y diseño
 

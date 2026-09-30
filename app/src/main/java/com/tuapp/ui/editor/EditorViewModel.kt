@@ -15,6 +15,9 @@ import androidx.lifecycle.viewmodel.viewModelFactory
 import com.tuapp.VersoApp
 import com.tuapp.analisis.AnalisisPoema
 import com.tuapp.analisis.Recursos
+import com.tuapp.audio.AudioPlayer
+import com.tuapp.data.Audio
+import com.tuapp.data.AudioRepository
 import com.tuapp.data.Note
 import com.tuapp.data.NoteType
 import com.tuapp.data.NotesRepository
@@ -26,9 +29,15 @@ import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.filter
+import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.mapLatest
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
@@ -47,6 +56,8 @@ import kotlinx.coroutines.withContext
 @OptIn(FlowPreview::class, ExperimentalCoroutinesApi::class)
 class EditorViewModel(
     private val repo: NotesRepository,
+    private val audioRepo: AudioRepository,
+    val player: AudioPlayer,
     private val appScope: CoroutineScope,
     val preferences: Preferences,
     state: SavedStateHandle
@@ -70,6 +81,47 @@ class EditorViewModel(
     private var deleted = false
     private var pendingSave: Job? = null
     private val mutex = Mutex()
+
+    // ---------- Linked audios ----------
+
+    /** The note's id as a flow: it changes from 0 when a new note is first saved. */
+    private val noteId = MutableStateFlow(id)
+
+    /** Audios linked to this note. */
+    val noteAudios: StateFlow<List<Audio>> = noteId
+        .flatMapLatest { if (it == 0L) flowOf(emptyList()) else audioRepo.audiosOfNote(it) }
+        .stateIn(viewModelScope, SharingStarted.Eagerly, emptyList())
+
+    /** Every audio, for the link dialog. */
+    val allAudios: StateFlow<List<Audio>> = audioRepo.audios("")
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
+
+    fun togglePlay(audio: Audio) = player.toggle(audio.id, audioRepo.fileOf(audio))
+    fun seek(ms: Long) = player.seekTo(ms)
+
+    /** Links exactly [audioIds] to this note. A new note is saved first so it has an id. */
+    fun setAudioLinks(audioIds: Set<Long>) {
+        val current = noteAudios.value.map { it.id }.toSet()
+        viewModelScope.launch {
+            val nid = ensureSaved()
+            (audioIds - current).forEach { audioRepo.link(nid, it) }
+            (current - audioIds).forEach { audioRepo.unlink(nid, it) }
+        }
+    }
+
+    fun unlinkAudio(audio: Audio) {
+        if (id == 0L) return
+        viewModelScope.launch { audioRepo.unlink(id, audio.id) }
+    }
+
+    private suspend fun ensureSaved(): Long = mutex.withLock {
+        if (id == 0L) {
+            withContext(NonCancellable) { id = repo.save(note()) }
+            noteId.value = id
+            hasChanges = false
+        }
+        id
+    }
 
     init {
         if (id != 0L) viewModelScope.launch {
@@ -119,7 +171,8 @@ class EditorViewModel(
         }
     }
 
-    private fun isEmpty() = title.isBlank() && content.isBlank()
+    /** Nothing written and no audios: such a note is discarded, as in Keep. */
+    private fun isEmpty() = title.isBlank() && content.isBlank() && noteAudios.value.isEmpty()
 
     private fun note() = Note(
         id = id, title = title, content = content, type = type,
@@ -130,6 +183,7 @@ class EditorViewModel(
         if (!hasChanges || deleted || isEmpty()) return@withLock
         // NonCancellable: if the note gets inserted, the new id must not be lost
         withContext(NonCancellable) { id = repo.save(note()) }
+        noteId.value = id
         hasChanges = false
     }
 
@@ -150,7 +204,10 @@ class EditorViewModel(
         val Factory = viewModelFactory {
             initializer {
                 val app = this[APPLICATION_KEY] as VersoApp
-                EditorViewModel(app.repository, app.appScope, app.preferences, createSavedStateHandle())
+                EditorViewModel(
+                    app.repository, app.audioRepository, app.audioPlayer,
+                    app.appScope, app.preferences, createSavedStateHandle()
+                )
             }
         }
     }

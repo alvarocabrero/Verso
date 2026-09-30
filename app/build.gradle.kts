@@ -7,8 +7,8 @@ plugins {
     alias(libs.plugins.ksp)
 }
 
-// Firma de release: se lee de keystore.properties (fuera de git). Sin ese archivo,
-// la build de release sale sin firmar y no se puede instalar.
+// Release signing is read from keystore.properties (not in git). Without that file
+// the release build is unsigned and cannot be installed.
 val firma = rootProject.file("keystore.properties").takeIf { it.exists() }?.let { f ->
     Properties().apply { f.inputStream().use { load(it) } }
 }
@@ -48,6 +48,11 @@ android {
     }
     kotlinOptions { jvmTarget = "17" }
     buildFeatures { compose = true }
+}
+
+// Room writes each database version's schema here, so migrations can be checked
+ksp {
+    arg("room.schemaLocation", "$projectDir/schemas")
 }
 
 dependencies {

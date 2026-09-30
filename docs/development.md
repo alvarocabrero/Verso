@@ -135,6 +135,8 @@ The `applicationId` is `com.tuapp.verso`; the code's package is `com.tuapp`.
 | Enter / Escape / end of line | `adb shell input keyevent 66` / `111` / `123` |
 | Dark mode | `adb shell cmd uimode night yes` (and `no` to go back) |
 | Wake the screen | `adb shell input keyevent 224` |
+| Grant the microphone permission | `adb shell pm grant com.tuapp.verso android.permission.RECORD_AUDIO` |
+| Put a test audio in Downloads | `adb push file.wav /sdcard/Download/` |
 | UI tree | `adb shell uiautomator dump /sdcard/ui.xml` then `adb shell cat /sdcard/ui.xml` |
 | App crashes | `adb logcat -b crash` |
 
@@ -157,6 +159,10 @@ Tips:
 - [ ] Clear alliteration has a solid underline; possible, a dotted one.
 - [ ] Dark mode is readable (margin, highlight, panel).
 - [ ] Leaving and coming back keeps the note; an emptied note disappears.
+- [ ] Audios: record (with pause), attach a file, play and seek, rename, delete.
+- [ ] Link audios and notes from both sides; card counters update; deleting an audio or a
+      note removes only the links.
+- [ ] Installing over the previous release keeps notes (and audios).
 
 ## Releasing a version
 
@@ -250,21 +256,24 @@ code that is only used through reflection.
 
 ## Changing the data model
 
-`VersoDatabase` is at version 1 with no exported schema. To add a field to `Note`
-(e.g. tags):
+`VersoDatabase` is at **version 2** (0.2.0: audios). Room exports each version's schema to
+`app/schemas/com.tuapp.data.VersoDatabase/<version>.json` (commit these files). To change an
+entity (e.g. add a `tags` column to `Note`):
 
-1. Add the field with a default value.
-2. Bump `version` to 2 and register a migration:
+1. Add the field with a default value. Keep existing table and column names.
+2. Bump `version` to 3 and register a migration next to `MIGRATION_1_2`:
    ```kotlin
-   val MIGRATION_1_2 = object : Migration(1, 2) {
+   val MIGRATION_2_3 = object : Migration(2, 3) {
        override fun migrate(db: SupportSQLiteDatabase) {
            db.execSQL("ALTER TABLE notas ADD COLUMN etiquetas TEXT NOT NULL DEFAULT ''")
        }
    }
-   Room.databaseBuilder(…).addMigrations(MIGRATION_1_2).build()
+   Room.databaseBuilder(…).addMigrations(MIGRATION_1_2, MIGRATION_2_3).build()
    ```
-3. Consider enabling `exportSchema = true` and committing the schemas so migrations can be
-   tested.
+3. Build, and copy the SQL of new tables from the generated `3.json` (`createSql`) into the
+   migration, so it matches what Room expects exactly.
+4. Test on a device: install the new build **over** the previous release with notes and
+   audios, and check nothing is lost.
 
 ## Troubleshooting
 

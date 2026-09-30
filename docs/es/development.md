@@ -134,6 +134,8 @@ El `applicationId` es `com.tuapp.verso`; el paquete del código, `com.tuapp`.
 | Escribir (sin tildes ni ñ) | `adb shell input text 'hola%smundo'` (`%s` = espacio) |
 | Intro / Escape / fin de línea | `adb shell input keyevent 66` / `111` / `123` |
 | Modo oscuro | `adb shell cmd uimode night yes` (y `no` para volver) |
+| Dar permiso de micrófono | `adb shell pm grant com.tuapp.verso android.permission.RECORD_AUDIO` |
+| Poner un audio de prueba en Descargas | `adb push archivo.wav /sdcard/Download/` |
 | Árbol de la interfaz | `adb shell uiautomator dump /sdcard/ui.xml` y `adb shell cat /sdcard/ui.xml` |
 | Errores de la app | `adb logcat -b crash` |
 
@@ -156,6 +158,10 @@ Consejos:
 - [ ] Aliteración clara con subrayado sólido; posible, punteado.
 - [ ] Modo oscuro legible (margen, resaltado, panel).
 - [ ] Salir y volver a entrar conserva la nota; una nota vaciada desaparece.
+- [ ] Audios: grabar (con pausa), adjuntar un archivo, reproducir y avanzar, renombrar, borrar.
+- [ ] Vincular audios y notas desde los dos lados; los contadores se actualizan; borrar un
+      audio o una nota solo quita los vínculos.
+- [ ] Instalar encima de la release anterior conserva las notas (y los audios).
 
 ## Publicar una versión
 
@@ -252,21 +258,24 @@ puede eliminar código que solo se usa por reflexión.
 
 ## Cómo cambiar el modelo de datos
 
-`VersoDatabase` está en la versión 1 sin esquema exportado. Para añadir un campo a `Note`
-(por ejemplo, etiquetas):
+`VersoDatabase` está en la **versión 2** (0.2.0: audios). Room exporta el esquema de cada
+versión a `app/schemas/com.tuapp.data.VersoDatabase/<versión>.json` (súbelos al repositorio).
+Para cambiar una entidad (por ejemplo, añadir una columna de etiquetas a `Note`):
 
-1. Añade el campo con valor por defecto.
-2. Sube `version` a 2 y registra una migración:
+1. Añade el campo con valor por defecto. Conserva los nombres de tablas y columnas.
+2. Sube `version` a 3 y registra una migración junto a `MIGRATION_1_2`:
    ```kotlin
-   val MIGRACION_1_2 = object : Migration(1, 2) {
+   val MIGRATION_2_3 = object : Migration(2, 3) {
        override fun migrate(db: SupportSQLiteDatabase) {
            db.execSQL("ALTER TABLE notas ADD COLUMN etiquetas TEXT NOT NULL DEFAULT ''")
        }
    }
-   Room.databaseBuilder(…).addMigrations(MIGRACION_1_2).build()
+   Room.databaseBuilder(…).addMigrations(MIGRATION_1_2, MIGRATION_2_3).build()
    ```
-3. Plantéate activar `exportSchema = true` y guardar los esquemas en el repositorio para
-   poder probar las migraciones.
+3. Compila y copia en la migración el SQL de las tablas nuevas del `3.json` generado
+   (`createSql`), para que coincida exactamente con lo que Room espera.
+4. Pruébalo en un dispositivo: instala la versión nueva **encima** de la release anterior con
+   notas y audios, y comprueba que no se pierde nada.
 
 ## Resolución de problemas
 

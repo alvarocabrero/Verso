@@ -8,39 +8,36 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.staggeredgrid.LazyVerticalStaggeredGrid
 import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridCells
 import androidx.compose.foundation.lazy.staggeredgrid.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.PushPin
-import androidx.compose.material.icons.filled.Search
+import androidx.compose.material.icons.outlined.Headphones
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextField
-import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.tuapp.data.Note
+import com.tuapp.ui.components.SearchField
 import com.tuapp.ui.theme.VerseStyle
 import com.tuapp.ui.theme.noteBackground
 
@@ -51,6 +48,7 @@ fun NotesScreen(
 ) {
     val notes by vm.notes.collectAsStateWithLifecycle()
     val query by vm.query.collectAsStateWithLifecycle()
+    val audioCounts by vm.audioCounts.collectAsStateWithLifecycle()
 
     Scaffold(
         floatingActionButton = {
@@ -62,7 +60,7 @@ fun NotesScreen(
         }
     ) { padding ->
         Column(Modifier.padding(padding).fillMaxSize()) {
-            SearchField(query, vm::search)
+            SearchField(query, vm::search, "Buscar en tus notas")
             val list = notes
             when {
                 list == null -> Unit
@@ -75,7 +73,7 @@ fun NotesScreen(
                     modifier = Modifier.fillMaxSize()
                 ) {
                     items(list, key = { it.id }) { note ->
-                        NoteCard(note, onClick = { openNote(note.id) })
+                        NoteCard(note, audioCounts[note.id] ?: 0, onClick = { openNote(note.id) })
                     }
                 }
             }
@@ -83,32 +81,9 @@ fun NotesScreen(
     }
 }
 
-@Composable
-private fun SearchField(text: String, onChange: (String) -> Unit) {
-    TextField(
-        value = text,
-        onValueChange = onChange,
-        placeholder = { Text("Buscar en tus notas") },
-        leadingIcon = { Icon(Icons.Filled.Search, contentDescription = null) },
-        trailingIcon = {
-            if (text.isNotEmpty()) IconButton(onClick = { onChange("") }) {
-                Icon(Icons.Filled.Close, contentDescription = "Borrar búsqueda")
-            }
-        },
-        singleLine = true,
-        shape = RoundedCornerShape(28.dp),
-        colors = TextFieldDefaults.colors(
-            focusedContainerColor = MaterialTheme.colorScheme.surfaceVariant,
-            unfocusedContainerColor = MaterialTheme.colorScheme.surfaceVariant,
-            focusedIndicatorColor = Color.Transparent,
-            unfocusedIndicatorColor = Color.Transparent
-        ),
-        modifier = Modifier.fillMaxWidth().padding(horizontal = 12.dp, vertical = 8.dp)
-    )
-}
 
 @Composable
-private fun NoteCard(note: Note, onClick: () -> Unit) {
+private fun NoteCard(note: Note, audioCount: Int, onClick: () -> Unit) {
     Surface(
         onClick = onClick,
         shape = RoundedCornerShape(14.dp),
@@ -119,6 +94,14 @@ private fun NoteCard(note: Note, onClick: () -> Unit) {
             if (note.title.isNotBlank()) {
                 Text(note.title, style = VerseStyle.cardTitle, maxLines = 2, overflow = TextOverflow.Ellipsis)
                 Spacer(Modifier.height(6.dp))
+            }
+            if (note.title.isBlank() && note.content.isBlank()) {
+                // A note kept only for its audios
+                Text(
+                    "Sin texto",
+                    style = VerseStyle.cardBody.copy(fontStyle = FontStyle.Italic),
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
             }
             if (note.content.isNotBlank()) {
                 // Line breaks are kept: a poem is not read as a paragraph.
@@ -137,6 +120,20 @@ private fun NoteCard(note: Note, onClick: () -> Unit) {
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
                 Spacer(Modifier.weight(1f))
+                if (audioCount > 0) {
+                    Icon(
+                        Icons.Outlined.Headphones,
+                        contentDescription = if (audioCount == 1) "1 audio" else "$audioCount audios",
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                        modifier = Modifier.size(14.dp)
+                    )
+                    Text(
+                        " $audioCount",
+                        style = MaterialTheme.typography.labelSmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                    if (note.pinned) Spacer(Modifier.width(8.dp))
+                }
                 if (note.pinned) Icon(
                     Icons.Filled.PushPin,
                     contentDescription = "Fijada",

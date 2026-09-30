@@ -22,6 +22,11 @@ class Preferences(context: Context) {
     /** Colour each rhyme group in the text (highlighter style). */
     var colorRhymes by mutableStateOf(sp.getBoolean(COLOR_RHYMES, false)); private set
 
+    /** Home screen section: 0 = notes, 1 = audios. */
+    var homeTab by mutableStateOf(sp.getInt(HOME_TAB, 0)); private set
+
+    fun updateHomeTab(value: Int) { homeTab = value; sp.edit().putInt(HOME_TAB, value).apply() }
+
     fun updateSeseo(value: Boolean) { seseo = value; sp.edit().putBoolean(SESEO, value).apply() }
 
     fun updateShowAnalysis(value: Boolean) {
@@ -39,5 +44,6 @@ class Preferences(context: Context) {
         const val SESEO = "seseo"
         const val SHOW_ANALYSIS = "mostrar_analisis"
         const val COLOR_RHYMES = "color_rhymes"
+        const val HOME_TAB = "home_tab"
     }
 }

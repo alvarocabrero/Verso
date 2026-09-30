@@ -22,6 +22,15 @@ aliteración, la anáfora o el paralelismo.
   de papel (con variante nocturna).
 - Fijar notas arriba, búsqueda por título y contenido, cuadrícula escalonada.
 - Autoguardado: sin botón de guardar; una nota que se deja vacía se descarta.
+**Audios**
+- Una segunda sección, que se cambia desde la barra de abajo: **Notas** / **Audios**.
+- **Grabar** ideas en la app (con pausa) o **adjuntar** audios del móvil (mp3, m4a, wav,
+  ogg, flac…); los archivos importados se copian dentro de la app.
+- Escucharlos ahí mismo con barra de avance, **cambiarles el nombre** y borrarlos.
+- **Vincular** audios y notas, de muchos a muchos: una canción puede tener varias maquetas y
+  una maqueta puede estar en varias canciones. El editor muestra los audios de la nota y las
+  tarjetas un 🎧 con el número.
+
 
 **Análisis en tiempo real, en el editor**
 - **Sílabas métricas** a la derecha de cada verso, ajustadas al metro dominante del poema
@@ -80,13 +89,17 @@ La guía completa del entorno (JDK, SDK, emulador en Windows) está en
 ```
 app/src/main/java/com/tuapp/
   VersoApp.kt          Application: contenedor de dependencias (sin Hilt)
-  MainActivity.kt      Navegación: lista de notas y editor
-  data/                Room (Note, NoteDao, VersoDatabase), repositorio y preferencias
-  ui/notes/            Pantalla principal: búsqueda y cuadrícula de tarjetas
+  MainActivity.kt      Navegación: inicio (notas / audios) y editor
+  data/                Room (Note, Audio, NoteAudio, DAOs, VersoDatabase), repositorios y preferencias
+  audio/               Grabador, reproductor y utilidades de formato de audio
+  ui/home/             Pantalla principal con la barra de abajo
+  ui/notes/            Sección de notas: búsqueda y cuadrícula de tarjetas
+  ui/audios/           Sección de audios: lista, reproductor, grabación, importar, vínculos
   ui/editor/           Editor con autoguardado y análisis en tiempo real
   ui/theme/            Tema "tinta sobre papel", estilos de verso y paleta de notas
   analisis/            Motor de análisis en Kotlin puro (sin Android)
 app/src/test/java/com/tuapp/analisis/   Tests JUnit del motor (57)
+app/src/test/java/com/tuapp/audio/      Tests JUnit de las utilidades de audio (5)
 docs/                  Documentación técnica en inglés (docs/es/: en español)
 ```
 
@@ -112,6 +125,7 @@ La versión en inglés de cada documento está en [docs/](docs/).
 
 ## Hoja de ruta
 
+- Grabar en segundo plano (con la pantalla bloqueada) y grabar directamente desde una nota.
 - Etiquetas y papelera con deshacer.
 - Exportar y compartir (texto, imagen).
 - Metro por estrofa para poemas polimétricos.

@@ -38,6 +38,8 @@ is in [analysis-engine.md](analysis-engine.md); the note's lifecycle, in
   example (Darío, Machado, Bécquer, Lope, Lorca, Hernández…), where it was found in the
   text and, for alliterations, how many times more frequent than usual the sound is and
   why it counts as clear or possible. The texts live in `ui/editor/DeviceInfo.kt`.
+- **Audios chip** (next to Poema / Canción): shows how many audios the note has and opens a
+  sheet to play, unlink and link them. See [architecture.md](architecture.md#audios).
 - **Brush button** (top bar, only while the analysis is shown): turns rhyme colouring on
   and off; remembered across sessions. See [Rhyme colouring](#rhyme-colouring).
 - **# button** (top bar): shows or hides the whole analysis. Remembered across sessions.

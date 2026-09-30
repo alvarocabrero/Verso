@@ -16,8 +16,9 @@ text analysis: metrical syllables per line, rhymes and literary devices.
 
 ## Status
 
-- Builds with no warnings (`gradlew assembleDebug` / `assembleRelease`) and the 57
-  engine tests pass (`gradlew testDebugUnitTest`). Tested on an emulator, not yet on a
+- Builds with no warnings (`gradlew assembleDebug` / `assembleRelease`) and the 62 JVM
+  tests pass (57 engine + 5 audio helpers;
+  `gradlew testDebugUnitTest`). Tested on an emulator, not yet on a
   real phone.
 - Release v0.1.0 is published on GitHub (signed APK, ~1.2 MB).
 - Build environment on this PC: JDK 17 (Temurin, in `C:\Program Files\Eclipse Adoptium`;
@@ -36,14 +37,18 @@ Java 17. Code package `com.tuapp`, applicationId `com.tuapp.verso`.
 
 ```
 app/src/main/java/com/tuapp/
-  VersoApp.kt            Application: database, repository, preferences and appScope
-  MainActivity.kt        NavHost: "notes" and "editor/{id}" (id 0 = new note)
-  data/                  Note (Room entity), NoteDao, VersoDatabase, NotesRepository, Preferences
+  VersoApp.kt            Application: database, repositories, preferences, audioPlayer, appScope
+  MainActivity.kt        NavHost: "home" (Notes / Audios tabs) and "editor/{id}" (id 0 = new note)
+  data/                  Note, Audio, NoteAudio (Room), DAOs, VersoDatabase (v2), repositories, Preferences
+  audio/                 AudioRecorder, AudioPlayer, AudioFormat (pure helpers, tested)
   ui/theme/              Theme (indigo ink on cool paper), VerseStyle, NotePalette
-  ui/notes/              Home screen: staggered grid + search
+  ui/home/               HomeScreen: bottom bar switching sections
+  ui/notes/              Notes section: staggered grid + search
+  ui/audios/             Audios section: list, player, record sheet, import, rename, link dialogs
+  ui/components/         SearchField
   ui/editor/             Editor with autosave and real-time analysis
   analisis/              Analysis engine, pure Kotlin with no Android dependencies (Spanish)
-app/src/test/java/com/tuapp/analisis/   JUnit tests for the engine
+app/src/test/java/com/tuapp/          JUnit tests: analisis/ (engine), audio/ (helpers)
 docs/                    architecture, analysis-engine, editor, development (+ docs/es/)
 ```
 
@@ -60,6 +65,15 @@ docs/                    architecture, analysis-engine, editor, development (+ d
   (`onCleared`, using `appScope` because `viewModelScope` is already cancelled). A note
   left empty is deleted. A `Mutex` and `NonCancellable` prevent duplicate inserts.
 - Don't name functions `setX` when there is a `var x … private set` (JVM clash); use `updateX`.
+
+## Audios (0.2.0)
+
+- DB version 2: tables `audios` and `note_audios` (many-to-many, FKs `ON DELETE CASCADE`),
+  created by `MIGRATION_1_2`; schemas exported to `app/schemas/`. Files in
+  `files/audios/` (imports are copied). A note with audios but no text is kept.
+- Recording: `MediaRecorder` AAC/m4a; paused on `ON_STOP` (no background recording yet).
+  Import via SAF `OpenDocument("audio/*")`. One app-wide `AudioPlayer` (`MediaPlayer`).
+- Preference keys added: `color_rhymes`, `home_tab`.
 
 ## Analysis engine (`com.tuapp.analisis`, in Spanish)
 
@@ -133,7 +147,8 @@ to wake a black screen, `MSYS_NO_PATHCONV=1` in Git Bash.
 
 ## Next steps
 
-Tags, trash with undo, export/share, metre per stanza, and optional semantic device
+Background recording and recording from a note; tags, trash with undo, export/share, metre
+per stanza, and optional semantic device
 detection with a language model.
 
 ## Conventions
