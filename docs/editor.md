@@ -1,16 +1,18 @@
-# El editor y el análisis en tiempo real
+# The editor and real-time analysis
 
-Este documento explica cómo se muestra el análisis mientras se escribe. El cálculo en sí
-está en [motor-de-analisis.md](motor-de-analisis.md); el ciclo de vida de la nota, en
-[arquitectura.md](arquitectura.md).
+[Español](es/editor.md)
+
+This document explains how the analysis is displayed while typing. The computation itself
+is in [analysis-engine.md](analysis-engine.md); the note's lifecycle, in
+[architecture.md](architecture.md).
 
 <p align="center">
-  <img src="capturas/editor-margen.png" width="220" alt="Margen de sílabas y rimas">
-  <img src="capturas/aliteracion-clara.png" width="220" alt="Aliteración clara subrayada">
-  <img src="capturas/aliteracion-posible-oscuro.png" width="220" alt="Aliteración posible punteada, modo oscuro">
+  <img src="screenshots/editor-margin.png" width="220" alt="Syllable and rhyme margin">
+  <img src="screenshots/alliteration-clear.png" width="220" alt="Clear alliteration, underlined">
+  <img src="screenshots/alliteration-possible-dark.png" width="220" alt="Possible alliteration, dotted, dark mode">
 </p>
 
-## Qué ve quien escribe
+## What the writer sees
 
 ```
  ←                      #   📌  🎨  🗑
@@ -18,168 +20,167 @@ está en [motor-de-analisis.md](motor-de-analisis.md); el ciclo de vida de la no
  Soneto de repente
  Un soneto me manda hacer Violante,        11  A
  que en mi vida me he visto en tanto
- aprieto;                                  11  B    ← verso partido: marca en su última línea
+ aprieto;                                  11  B    ← wrapped line: mark on its last row
  catorce versos dicen que es soneto;       11  B
  burla burlando van los tres delante.      11  A
  ───────────────────────────────────────────────
- Endecasílabo · ABBA · 2 recursos          ˄        ← panel (se despliega)
+ Endecasílabo · ABBA · 2 recursos          ˄        ← panel (expands)
 ```
 
-- **Número**: sílabas métricas del verso ajustadas al metro dominante. En gris si el verso
-  lo admite, en rojo (`colorScheme.error`) si no.
-- **Letra**: grupo de rima, en el color primario. `·` apagado si el verso no rima con
-  ninguno. Minúsculas en arte menor.
-- **Panel**: resumen *metro · esquema · recursos*. Al tocarlo se despliega con el ajuste
-  de seseo y la lista de recursos (tipo, *clara/posible* en aliteraciones, versos y
-  evidencia). Tocar un recurso lo resalta y lleva la pantalla a su primer verso; tocarlo
-  otra vez lo quita.
-- **Botón #** (barra superior): muestra u oculta todo el análisis. Se recuerda entre
-  sesiones.
+- **Number**: the line's metrical syllables fitted to the dominant metre. Grey if the line
+  admits it, red (`colorScheme.error`) if not.
+- **Letter**: rhyme group, in the primary colour. A faint `·` if the line rhymes with no
+  other. Lowercase for *arte menor* (short lines).
+- **Panel**: summary *metre · scheme · devices*. Tapping it expands the seseo setting and
+  the list of devices (type, *clara/posible* for alliterations, lines and evidence). Tapping
+  a device highlights it and scrolls to its first line; tapping it again clears it.
+- **# button** (top bar): shows or hides the whole analysis. Remembered across sessions.
 
-## Componentes
+All user-facing text is in Spanish.
 
-Todos en `ui/editor/`.
+## Components
 
-| Composable / función | Archivo | Papel |
+All in `ui/editor/`.
+
+| Composable / function | File | Role |
 |---|---|---|
-| `EditorScreen` | `EditorScreen.kt` | Estructura: barra, selector de color, tipo, título, versos, panel |
-| `EditorVersos` | `AnalisisEditor.kt` | `BasicTextField` de los versos con margen, resaltado y cursor a la vista |
-| `MargenVersos` | `AnalisisEditor.kt` | Sílabas y letra de rima alineadas con cada verso |
-| `dibujarResaltado` | `AnalisisEditor.kt` | Fondo, subrayado o punteado bajo las palabras de un recurso |
-| `PanelAnalisis` / `FilaRecurso` | `AnalisisEditor.kt` | Resumen desplegable, seseo y lista de recursos |
-| `resaltadoDe` | `AnalisisEditor.kt` | Traduce un `Recurso` a rangos y estilo de resaltado |
+| `EditorScreen` | `EditorScreen.kt` | Layout: top bar, colour picker, type, title, verses, panel |
+| `VerseEditor` | `AnalysisEditor.kt` | Verse `BasicTextField` with margin, highlight and cursor kept in view |
+| `VerseMargin` | `AnalysisEditor.kt` | Syllables and rhyme letter aligned with each line |
+| `drawHighlight` | `AnalysisEditor.kt` | Background, underline or dotted line under a device's words |
+| `AnalysisPanel` / `DeviceRow` | `AnalysisEditor.kt` | Expandable summary, seseo and device list |
+| `highlightFor` | `AnalysisEditor.kt` | Turns a `Recurso` into ranges and a highlight style |
 
-## Por qué un solo scroll
+## Why a single scroll
 
-El título y los versos van dentro de una única `Column` con `verticalScroll`, y el campo
-de versos **no tiene scroll propio** (crece con el texto). Así:
+The title and the verses sit inside one `Column` with `verticalScroll`, and the verse field
+**has no scroll of its own** (it grows with the text). This way:
 
-- el margen puede colocarse con las coordenadas del `TextLayoutResult` del campo, sin
-  tener que seguir un segundo scroll interno;
-- el título se desplaza con el poema, como en una hoja.
+- the margin can be placed using the field's `TextLayoutResult` coordinates, without
+  tracking a second inner scroll;
+- the title scrolls with the poem, like a sheet of paper.
 
-El precio es que Compose no lleva el cursor a la vista por sí solo en esta disposición.
-`EditorVersos` lo resuelve a mano (ver [Cursor a la vista](#cursor-a-la-vista)).
+The trade-off is that Compose does not keep the cursor in view on its own in this layout.
+`VerseEditor` handles it by hand (see [Keeping the cursor in view](#keeping-the-cursor-in-view)).
 
-El campo tiene una altura mínima de 320 dp para que se pueda tocar en cualquier punto de
-la página aunque esté vacío.
+The field has a minimum height of 320 dp so the page can be tapped anywhere even when
+empty.
 
-## Alinear el margen
+## Aligning the margin
 
-Cada `AnalisisPoema.Linea` sabe dónde empieza y acaba en el texto (`inicio`, `fin`). Con
-el `TextLayoutResult` del campo:
+Each `AnalisisPoema.Linea` knows where it starts and ends in the text (`inicio`, `fin`).
+With the field's `TextLayoutResult`:
 
 ```kotlin
-val visual = layout.getLineForOffset(linea.fin)   // última línea visual del verso
-val arriba = layout.getLineTop(visual)
-val alto   = layout.getLineBottom(visual) - arriba
+val row    = layout.getLineForOffset(line.fin)   // last visual row of the line
+val top    = layout.getLineTop(row)
+val height = layout.getLineBottom(row) - top
 ```
 
-El margen se dibuja como una `Box` de 56 dp superpuesta a la derecha del campo (que tiene
-ese mismo relleno a la derecha). Cada marca es una `Row` desplazada con
-`offset { IntOffset(0, margenSuperior + arriba) }` y de altura `alto`, centrada en
-vertical. Usar `fin` y no `inicio` hace que en un verso que ocupa varias líneas visuales
-la marca quede en la última, junto a la palabra que rima.
+The margin is a 56 dp `Box` overlaid on the right of the field (which has the same end
+padding). Each mark is a `Row` moved with `offset { IntOffset(0, topPadding + top) }` and
+`height` tall, vertically centred. Using `fin` rather than `inicio` puts the mark of a
+wrapped line on its last row, next to the rhyming word.
 
-Cada marca tiene una descripción para lectores de pantalla: *"11 sílabas, rima A"* o
+Each mark has a screen-reader description: *"11 sílabas, rima A"* or
 *"9 sílabas, no encaja en el metro"*.
 
-## Análisis que va por detrás
+## When the analysis lags behind
 
-El análisis llega 300 ms después de dejar de escribir, así que durante unos instantes
-el resultado corresponde a un texto anterior. Para no dibujar marcas en sitios equivocados:
+The analysis arrives 300 ms after typing stops, so for a moment the result belongs to an
+earlier version of the text. To avoid drawing marks in the wrong places:
 
-| Qué | Se muestra si… | Motivo |
+| What | Shown when… | Why |
 |---|---|---|
-| Margen | el resultado tiene **el mismo número de líneas** que el texto actual | Escribir dentro de un verso no mueve los versos; añadir o quitar líneas sí |
-| Resaltado | el texto analizado es **idéntico** al actual | Los rangos son posiciones de carácter: cualquier cambio los desplaza |
+| Margin | the result has **the same number of lines** as the current text | Typing inside a line doesn't move lines; adding or removing lines does |
+| Highlight | the analysed text is **identical** to the current one | Ranges are character offsets: any change shifts them |
 
-En la práctica, el margen no parpadea al escribir dentro de un verso y se oculta un
-momento al pulsar Intro.
+In practice the margin doesn't flicker while typing within a line, and disappears for a
+moment after pressing Enter.
 
-## Resaltado
+## Highlighting
 
-`resaltadoDe(analisis, recurso)` obtiene los rangos con `AnalisisPoema.rangos` y elige el
-estilo:
+`highlightFor(analysis, device)` gets the ranges from `AnalisisPoema.rangos` and picks the
+style:
 
-| Recurso | Estilo |
+| Device | Style |
 |---|---|
-| Aliteración clara (intensidad ≥ 4,5) | `SUBRAYADO`: línea sólida de 2 dp bajo la palabra |
-| Aliteración posible | `PUNTEADO`: línea discontinua (2 dp trazo, 3 dp hueco) |
-| Resto de recursos | `FONDO`: rectángulo redondeado del color primario al 16 % |
+| Clear alliteration (intensity ≥ 4.5) | `UNDERLINE`: a solid 2 dp line under the word |
+| Possible alliteration | `DOTTED`: a dashed line (2 dp dash, 3 dp gap) |
+| Any other device | `BACKGROUND`: a rounded rectangle in the primary colour at 16 % |
 
-Se dibuja en `Modifier.drawBehind` del propio campo, **detrás** del texto. Para cada
-rango se calculan las líneas visuales que ocupa y, en cada una, las coordenadas x con
-`getHorizontalPosition`; la línea de subrayado va 4 dp bajo la línea base. Todo usa el
-color primario del tema, así que funciona igual en claro y en oscuro.
+It is drawn in the field's own `Modifier.drawBehind`, **behind** the text. For each range
+the visual rows it spans are computed and, on each, the x coordinates with
+`getHorizontalPosition`; the underline sits 4 dp below the baseline. Everything uses the
+theme's primary colour, so it works the same in light and dark mode.
 
-Si el recurso elegido desaparece tras editar (el nuevo análisis no lo contiene), la
-selección se borra sola.
+If the selected device disappears after an edit (the new analysis doesn't contain it), the
+selection is cleared automatically.
 
-## Desplazarse al recurso
+## Scrolling to a device
 
-Al elegir un recurso, `EditorScreen` lleva la página hasta él:
+When a device is selected, `EditorScreen` scrolls the page to it:
 
 ```kotlin
-LaunchedEffect(elegido) {
-    val inicio = resaltado.rangos.first().first
-    val y = yVersos + layout.getLineTop(layout.getLineForOffset(inicio)) - 48.dp
+LaunchedEffect(selected) {
+    val start = highlight.ranges.first().first
+    val y = versesY + layout.getLineTop(layout.getLineForOffset(start)) - 48.dp
     scroll.animateScrollTo(y)
 }
 ```
 
-`yVersos` es la posición del campo dentro de la columna con scroll (se mide con
-`onGloballyPositioned { it.positionInParent().y }`); `layoutVersos` llega desde el campo
-con el parámetro `alMedir`.
+`versesY` is the field's position inside the scrolling column (measured with
+`onGloballyPositioned { it.positionInParent().y }`); `versesLayout` comes from the field
+through the `onLayout` parameter.
 
-## Cursor a la vista
+## Keeping the cursor in view
 
-`EditorVersos` guarda su propio `TextFieldValue` para conocer la posición del cursor (el
-ViewModel solo guarda el `String`). Si el texto cambia desde fuera (al cargar la nota), el
-valor se reinicia con el cursor al final.
+`VerseEditor` keeps its own `TextFieldValue` to know where the cursor is (the ViewModel
+only stores the `String`). If the text changes from outside (when the note loads), the
+value is reset with the cursor at the end.
 
-Mientras el campo tiene el foco, cada vez que cambia la selección o el `TextLayoutResult`:
+While the field has focus, every time the selection or the `TextLayoutResult` changes:
 
 ```kotlin
-val cursor = layout.getCursorRect(seleccion.end)
-traerALaVista.bringIntoView(cursor ampliado 32 dp arriba y abajo)
+val cursor = layout.getCursorRect(selection.end)
+bringIntoView.bringIntoView(cursor expanded by 32 dp above and below)
 ```
 
-El `BringIntoViewRequester` está en la cadena de modificadores **después** del relleno
-del campo, así que sus coordenadas coinciden con las del texto. El scroll padre responde
-desplazándose lo justo para que el cursor quede visible sobre el teclado (la columna
-tiene `imePadding()`).
+The `BringIntoViewRequester` sits in the modifier chain **after** the field's padding, so
+its coordinates match the text's. The parent scroll responds by scrolling just enough for
+the cursor to be visible above the keyboard (the column has `imePadding()`).
 
-## Panel y teclado
+## Panel and keyboard
 
-Con el teclado abierto, el panel desplegado dejaría casi sin sitio a los versos. Por eso
-`PanelAnalisis` observa `WindowInsets.isImeVisible` y **se pliega al aparecer el teclado**.
-Se puede volver a abrir con el teclado visible; solo se pliega en el momento en que el
-teclado aparece. La lista de recursos tiene una altura máxima de 260 dp y su propio scroll.
+With the keyboard open, the expanded panel would leave almost no room for the verses. So
+`AnalysisPanel` watches `WindowInsets.isImeVisible` and **collapses when the keyboard
+appears**. It can be reopened with the keyboard visible; it only collapses at the moment
+the keyboard shows up. The device list is at most 260 dp tall and scrolls on its own.
 
-El estado desplegado se guarda con `rememberSaveable` (sobrevive a la rotación).
+The expanded state is kept with `rememberSaveable` (it survives rotation).
 
 ## Seseo
 
-El interruptor *Seseo (casa = caza)* del panel cambia `Preferencias.seseo`. Como es estado
-de Compose y forma parte de la clave del `snapshotFlow`, el análisis se recalcula al
-momento. Afecta a:
+The *Seseo (casa = caza)* chip in the panel toggles `Preferences.seseo`. Since it is Compose
+state and part of the `snapshotFlow` key, the analysis is recomputed immediately. It
+affects:
 
-- la rima consonante (*casa / caza*, *abrazo / paso*);
-- la aliteración (*s*, *z* y *c* ante e/i son el mismo sonido, con frecuencia base 9,1 %).
+- full rhyme (*casa / caza*, *abrazo / paso*);
+- alliteration (*s*, *z* and *c* before e/i become the same sound, with a base frequency
+  of 9.1 %).
 
-## Accesibilidad
+## Accessibility
 
-- Iconos de la barra con `contentDescription` que cambia con el estado
+- Top-bar icons have a `contentDescription` that follows their state
   (*Ocultar análisis / Mostrar análisis*, *Fijar / Desfijar*).
-- Cada marca del margen es un solo nodo semántico con su descripción.
-- El panel indica *Abrir análisis / Cerrar análisis*.
-- Visualmente, un verso que no encaja solo se distingue por el color del número; la
-  descripción para lectores de pantalla sí lo dice ("no encaja en el metro").
+- Each margin mark is a single semantics node with its description.
+- The panel announces *Abrir análisis / Cerrar análisis*.
+- Visually, a line that doesn't fit is told apart only by the number's colour; the
+  screen-reader description does say so ("no encaja en el metro").
 
-## Ideas pendientes
+## Ideas
 
-- Metro por estrofa, para poemas polimétricos.
-- Mostrar el silabeo de un verso al tocar su número (`Verso.silabasPara` ya da las
-  sílabas con `‿`).
-- Indicador de "no encaja" que no dependa solo del color.
+- Metre per stanza, for polymetric poems.
+- Show a line's syllabification when its number is tapped (`Verso.silabasPara` already
+  returns the syllables with `‿`).
+- A "doesn't fit" indicator that doesn't rely on colour alone.

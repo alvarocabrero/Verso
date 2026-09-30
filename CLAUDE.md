@@ -1,131 +1,141 @@
-# Verso: app Android de notas para poesía y letras de canciones
+# Verso: an Android notes app for poetry and song lyrics
 
-App tipo Google Keep pensada para escribir poemas y canciones en español. Su
-rasgo distintivo es el análisis del texto: sílabas métricas por verso, rimas y
-recursos literarios. Todo el código, los comentarios y la interfaz están en español.
+A Google Keep-style app for writing poems and songs in Spanish. What sets it apart is
+text analysis: metrical syllables per line, rhymes and literary devices.
 
-## Estado actual
+## Language
 
-- El proyecto compila (`gradlew assembleDebug`, sin avisos) y los 48 tests
-  JUnit del motor pasan (`gradlew testDebugUnitTest`). Probado en emulador;
-  aún no en un móvil real.
-- Entorno de compilación: JDK 17 (Temurin, en `C:\Program Files\Eclipse
-  Adoptium`; `java` no está en el PATH, hay que definir `JAVA_HOME`) y Android
-  SDK en `%LOCALAPPDATA%\Android\Sdk` (apuntado en `local.properties`).
-  Wrapper de Gradle 8.9 generado.
-- Las versiones de dependencias (AGP 8.7.3, Kotlin 2.0.21, Compose BOM
-  2024.12.01, Room 2.6.1) son de finales de 2024; se pueden actualizar.
+- App code (classes, functions, variables, comments, file and folder names) is in **English**.
+- The **analysis engine** (`com.tuapp.analisis`, `app/src/main/java/com/tuapp/analisis/`
+  and its tests) stays in **Spanish**: its names are Spanish metrics terms. Don't
+  translate or rename it.
+- Everything the user sees (UI text, analysis results, content descriptions) is in **Spanish**.
+- Docs: `README.md` (English, shown by GitHub) and `README.es.md` (Spanish); `docs/` in
+  English with a Spanish copy in `docs/es/` (same file names). Keep both languages in sync.
+- Repository: https://github.com/alvarocabrero/Verso (branch `main`).
+
+## Status
+
+- Builds with no warnings (`gradlew assembleDebug` / `assembleRelease`) and the 48
+  engine tests pass (`gradlew testDebugUnitTest`). Tested on an emulator, not yet on a
+  real phone.
+- Release v0.1.0 is published on GitHub (signed APK, ~1.2 MB).
+- Build environment on this PC: JDK 17 (Temurin, in `C:\Program Files\Eclipse Adoptium`;
+  `java` is not on the PATH, set `JAVA_HOME`), Android SDK in `%LOCALAPPDATA%\Android\Sdk`
+  (set in `local.properties`), Gradle wrapper 8.9, `gh` logged in as `alvarocabrero`.
+- Dependency versions (AGP 8.7.3, Kotlin 2.0.21, Compose BOM 2024.12.01, Room 2.6.1)
+  are from late 2024 and can be updated.
 
 ## Stack
 
-Kotlin, Jetpack Compose (Material 3), Room con KSP, Navigation Compose,
-ViewModel. Sin Hilt: las dependencias se crean a mano en `VersoApp`.
-minSdk 26, compileSdk/targetSdk 35, Java 17. Paquete `com.tuapp`.
+Kotlin, Jetpack Compose (Material 3), Room with KSP, Navigation Compose, ViewModel. No
+Hilt: dependencies are created by hand in `VersoApp`. minSdk 26, compileSdk/targetSdk 35,
+Java 17. Code package `com.tuapp`, applicationId `com.tuapp.verso`.
 
-## Estructura
+## Structure
 
 ```
 app/src/main/java/com/tuapp/
-  VersoApp.kt            Application: base de datos, repositorio y scopeApp
-  MainActivity.kt        NavHost: "notas" y "editor/{id}" (id 0 = nota nueva)
-  data/                  Nota (entidad Room), NotaDao, VersoDatabase, NotasRepositorio
-  ui/theme/              Tema (tinta índigo sobre papel frío), EstiloVerso, PaletaNotas
-  ui/notas/              Pantalla principal: cuadrícula escalonada + búsqueda
-  ui/editor/             Editor con autoguardado
-  analisis/              Motor de análisis, Kotlin puro sin dependencias de Android
-app/src/test/java/com/tuapp/analisis/   Tests JUnit del motor
+  VersoApp.kt            Application: database, repository, preferences and appScope
+  MainActivity.kt        NavHost: "notes" and "editor/{id}" (id 0 = new note)
+  data/                  Note (Room entity), NoteDao, VersoDatabase, NotesRepository, Preferences
+  ui/theme/              Theme (indigo ink on cool paper), VerseStyle, NotePalette
+  ui/notes/              Home screen: staggered grid + search
+  ui/editor/             Editor with autosave and real-time analysis
+  analisis/              Analysis engine, pure Kotlin with no Android dependencies (Spanish)
+app/src/test/java/com/tuapp/analisis/   JUnit tests for the engine
+docs/                    architecture, analysis-engine, editor, development (+ docs/es/)
 ```
 
-## Datos y editor
+## Data and editor
 
-- `Nota`: id, titulo, contenido, tipo (`TipoNota.POEMA` / `CANCION`), color
-  (índice en `PaletaNotas`), fijada, creada, modificada.
-- Orden de la lista: fijadas primero, luego por fecha de modificación.
-- Autoguardado en `EditorViewModel`: guarda 600 ms tras el último cambio y al
-  salir (`onCleared`, usando `scopeApp` porque `viewModelScope` ya está
-  cancelado). Una nota que se deja vacía se borra. Un `Mutex` y `NonCancellable`
-  evitan inserciones duplicadas.
+- `Note`: id, title, content, type (`NoteType.POEM` / `SONG`), color (index into
+  `NotePalette`), pinned, created, modified.
+- **Database compatibility**: the table (`notas`) and columns keep the Spanish names from
+  v0.1.0 via `@ColumnInfo`, and `Converters` stores `NoteType` as `"POEMA"`/`"CANCION"`.
+  Preference keys (`seseo`, `mostrar_analisis`) also keep their names. Never rename
+  them; schema changes need a version bump and a Room `Migration`.
+- List order: pinned first, then by modification date.
+- Autosave in `EditorViewModel`: saves 600 ms after the last change and on exit
+  (`onCleared`, using `appScope` because `viewModelScope` is already cancelled). A note
+  left empty is deleted. A `Mutex` and `NonCancellable` prevent duplicate inserts.
+- Don't name functions `setX` when there is a `var x … private set` (JVM clash); use `updateX`.
 
-## Motor de análisis (`com.tuapp.analisis`)
+## Analysis engine (`com.tuapp.analisis`, in Spanish)
 
-**Silabeador**: `silabear(palabra)`, `silabaTonica()`, `analizar()` → sílabas,
-índice de la tónica y tipo acentual (aguda/llana/esdrújula/sobresdrújula);
-`palabrasDe(verso)`. Maneja diptongos, triptongos, hiatos, ch/ll/rr, u muda en
-qu/gu, ü, y vocálica final y grupos consonánticos inseparables.
+**Silabeador**: `silabear(palabra)`, `silabaTonica()`, `analizar()` → syllables, index of
+the stressed one and stress type (aguda/llana/esdrújula/sobresdrújula); `palabrasDe(verso)`.
+Handles diphthongs, triphthongs, hiatus, ch/ll/rr, silent u in qu/gu, ü, final vocalic y
+and inseparable consonant clusters.
 
-**Metrica**: `Verso(texto)` da un **rango** `minimo..maximo`, porque la
-sinalefa es opcional (cada sinalefa resta una sílaba). Aplica la ley del acento
-final (+1 aguda, −1 esdrújula). `silabasPara(metro)` ajusta el verso rompiendo
-primero las sinalefas con vocal tónica y marca las aplicadas con "‿".
-`metroDominante(versos)` elige el metro compatible con más versos.
-`nombreMetro(n)` → "endecasílabo", etc.
+**Metrica**: `Verso(texto)` gives a **range** `minimo..maximo`, because *sinalefa* is
+optional (each one removes a syllable). Applies the final-stress rule (+1 aguda,
+−1 esdrújula). `silabasPara(metro)` fits the line by breaking *sinalefas* on stressed
+vowels first and marks applied ones with "‿". `metroDominante(versos)` picks the metre
+that fits most lines. `nombreMetro(n)` → "endecasílabo", etc.
 
-**Rima**: `terminacion(verso)` da claves consonante (fonética: b=v, h muda,
-yeísmo, seseo opcional) y asonante (tónica + vocal final; en posición final
-átona i≈e, u≈o). `comparar(a, b)` y `esquema(lineas)` → letras ABBA, "-" para
-versos sueltos, `minusculas` para arte menor.
+**Rima**: `terminacion(verso)` gives consonant keys (phonetic: b=v, silent h, yeísmo,
+optional seseo) and assonant keys (stressed + final vowel; in an unstressed final
+position i≈e, u≈o). `comparar(a, b)` and `esquema(lineas)` → ABBA letters, "-" for
+unrhymed lines, `minusculas` for arte menor.
 
-**Recursos**: `detectar(texto)` → lista de `Recurso(tipo, lineas, evidencia,
-palabras, intensidad)`. Detecta aliteración, anáfora, epífora, anadiplosis,
-epanadiplosis, geminación, polisíndeton, asíndeton, paralelismo y estribillo.
-La aliteración cuenta solo consonantes en ataque silábico frente a su
-frecuencia normal en español (umbral 3,5; `clara` desde 4,5), analiza cada
-verso y cada par de versos consecutivos, y fusiona los solapamientos.
+**Recursos**: `detectar(texto)` → list of `Recurso(tipo, lineas, evidencia, palabras,
+intensidad)`. Detects alliteration, anaphora, epiphora, anadiplosis, epanadiplosis,
+geminatio, polysyndeton, asyndeton, parallelism and refrain. Alliteration counts only
+syllable-onset consonants against their normal frequency in Spanish (threshold 3.5;
+`clara` from 4.5), analyses each line and each pair of consecutive lines, and merges
+overlaps.
 
-**Limitaciones conocidas**: no detecta diéresis/sinéresis ni hemistiquios de
-alejandrinos; no hay rimas internas ni "casi rimas"; no detecta recursos
-semánticos (metáfora, símil…), que requerirían un modelo de lenguaje.
+**AnalisisPoema**: `analizar(texto, seseo)` combines dominant metre, syllables per line
+(the metre if the line admits it; otherwise the closest value in its range and
+`encaja = false`), rhyme and devices, with each line's offsets in the text.
+`rangos(resultado, recurso)` gives the characters to highlight.
 
-## Diseño
+**Known limitations**: no diéresis/sinéresis or alexandrine hemistichs; no internal or
+near rhymes; no semantic devices (metaphor, simile…), which would need a language model;
+one metre per poem.
 
-Cuaderno de tinta: serif (`FontFamily.Serif`) con interlineado amplio para los
-versos, sans del sistema para la interfaz. Las tarjetas respetan los saltos de
-línea, son planas y sin sombra (borde fino solo si no tienen color). Siete
-colores de nota con variante oscura. Textos en español, en tono sencillo.
+## Analysis in the editor
 
-## Análisis en el editor
+- `EditorViewModel` recomputes it with `snapshotFlow` + `debounce(300)` + `mapLatest` on
+  `Dispatchers.Default`. The result stores the analysed text: the margin is drawn while
+  the line count is unchanged, the highlight only if the text matches exactly.
+- `ui/editor/AnalysisEditor.kt`: `VerseEditor` (a `BasicTextField` inside the screen's
+  scroll, without its own scroll, so the margin aligns with `TextLayoutResult`; syllables
+  and letter on each line's last visual row, red if it doesn't fit; own `TextFieldValue`
+  + `BringIntoViewRequester` keep the cursor in view), highlight drawn in `drawBehind`
+  (background; clear alliteration solid underline, possible dotted) and `AnalysisPanel`
+  (summary metre · scheme · device count, expandable list and seseo; collapses when the
+  keyboard opens). Selecting a device scrolls to its first line.
+- `data/Preferences` (SharedPreferences as Compose state): seseo and show/hide analysis
+  (button in the top bar).
 
-- `AnalisisPoema` (en `analisis/`, con tests): `analizar(texto, seseo)` junta
-  metro dominante, sílabas por línea (el metro si el verso lo admite; si no,
-  el valor más cercano de su rango y `encaja = false`), rima y recursos, con
-  la posición de cada línea en el texto. `rangos(resultado, recurso)` da los
-  caracteres a resaltar (inicio en anáfora, final en epífora, verso entero en
-  paralelismo/asíndeton/estribillo…).
-- `EditorViewModel` lo recalcula con `snapshotFlow` + `debounce(300)` +
-  `mapLatest` en `Dispatchers.Default`. El resultado guarda el texto
-  analizado: el margen se dibuja mientras no cambie el número de líneas y el
-  resaltado solo si el texto coincide exactamente.
-- `ui/editor/AnalisisEditor.kt`: `EditorVersos` (un `BasicTextField` dentro
-  del scroll de la pantalla, sin scroll propio, para que el margen se alinee
-  con `TextLayoutResult`; sílabas y letra en la última línea visual de cada
-  verso, en rojo si no encaja), resaltado dibujado en `drawBehind` (fondo;
-  aliteración clara con subrayado sólido, posible con punteado) y
-  `PanelAnalisis` (resumen metro · esquema · nº de recursos, desplegable con
-  la lista y el ajuste de seseo). Al elegir un recurso la pantalla se desplaza
-  a su primer verso.
-- `data/Preferencias` (SharedPreferences como estado de Compose): seseo y
-  mostrar/ocultar el análisis (botón en la barra superior).
-- Como el campo no tiene scroll propio, `EditorVersos` lleva un
-  `TextFieldValue` interno y un `BringIntoViewRequester` para mantener el
-  cursor a la vista. El panel se cierra solo al abrirse el teclado.
-- Probado en emulador (Pixel 7, API 35, AVD `Verso_API35`): margen alineado
-  también en versos partidos, cursor visible, resaltados y modo oscuro.
-  En el emulador conviene `settings put secure stylus_handwriting_enabled 0`
-  para que Gboard no abra el tutorial de lápiz al escribir con `adb input`.
+## Design
 
-## Siguiente paso
+Ink notebook: serif (`FontFamily.Serif`) with generous line height for verses, system
+sans for the UI. Cards keep line breaks, are flat with no shadow (thin border only when
+uncoloured). Seven note colours with a dark variant. UI text in plain Spanish.
 
-Etiquetas, papelera con deshacer, exportar/compartir y la opción de detectar
-recursos semánticos con un modelo de lenguaje.
+## Releases
 
-## Documentación
+Signed with `%USERPROFILE%\.verso-firma\verso-release.jks`, read from `keystore.properties`
+(gitignored). R8 + resource shrinking in release. Steps in `docs/development.md`
+("Releasing a version"). Always test the release build, and install it over the previous
+release to check notes survive. Release notes in English with a collapsible Spanish section.
 
-`README.md` (inglés, el que muestra GitHub), `README.es.md` (español; mantener los dos
-iguales) y `docs/` en español (arquitectura, motor-de-analisis, editor, desarrollo). Si cambias
-el comportamiento del motor o del editor, actualiza el documento correspondiente.
-Repositorio: https://github.com/alvarocabrero/Verso (rama `main`).
+## Emulator
 
-## Convenciones
+AVD `Verso_API35` (Pixel 7, API 35), WHPX enabled. Useful: `adb shell settings put secure
+stylus_handwriting_enabled 0` (Gboard stylus tutorial swallows `adb input`), keyevent 224
+to wake a black screen, `MSYS_NO_PATHCONV=1` in Git Bash.
 
-- Nombres de clases, funciones y variables en español, como el código existente.
-- El motor de análisis no debe depender de Android; cada cambio en él va con tests.
+## Next steps
+
+Tags, trash with undo, export/share, metre per stanza, and optional semantic device
+detection with a language model.
+
+## Conventions
+
+- Names in English for app code, Spanish in the analysis engine (see Language).
+- The analysis engine must not depend on Android; every change to it comes with tests.
+- If you change engine or editor behaviour, update the matching doc in both languages.

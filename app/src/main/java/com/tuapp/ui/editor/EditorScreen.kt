@@ -60,48 +60,48 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.tuapp.data.TipoNota
-import com.tuapp.ui.theme.EstiloVerso
-import com.tuapp.ui.theme.PaletaNotas
-import com.tuapp.ui.theme.fondoNota
+import com.tuapp.data.NoteType
+import com.tuapp.ui.theme.NotePalette
+import com.tuapp.ui.theme.VerseStyle
+import com.tuapp.ui.theme.noteBackground
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun EditorScreen(
-    alVolver: () -> Unit,
+    onBack: () -> Unit,
     vm: EditorViewModel = viewModel(factory = EditorViewModel.Factory)
 ) {
-    var mostrarColores by remember { mutableStateOf(false) }
+    var showColors by remember { mutableStateOf(false) }
 
     Scaffold(
-        containerColor = fondoNota(vm.color),
+        containerColor = noteBackground(vm.color),
         topBar = {
             TopAppBar(
                 title = {},
                 navigationIcon = {
-                    IconButton(onClick = alVolver) {
+                    IconButton(onClick = onBack) {
                         Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Volver")
                     }
                 },
                 actions = {
-                    val mostrar = vm.preferencias.mostrarAnalisis
-                    IconButton(onClick = { vm.preferencias.cambiarMostrarAnalisis(!mostrar) }) {
+                    val show = vm.preferences.showAnalysis
+                    IconButton(onClick = { vm.preferences.updateShowAnalysis(!show) }) {
                         Icon(
-                            if (mostrar) Icons.Filled.Numbers else Icons.Outlined.Numbers,
-                            contentDescription = if (mostrar) "Ocultar análisis" else "Mostrar análisis",
-                            tint = if (mostrar) MaterialTheme.colorScheme.primary else LocalContentColor.current
+                            if (show) Icons.Filled.Numbers else Icons.Outlined.Numbers,
+                            contentDescription = if (show) "Ocultar análisis" else "Mostrar análisis",
+                            tint = if (show) MaterialTheme.colorScheme.primary else LocalContentColor.current
                         )
                     }
-                    IconButton(onClick = vm::alternarFijada) {
+                    IconButton(onClick = vm::togglePinned) {
                         Icon(
-                            if (vm.fijada) Icons.Filled.PushPin else Icons.Outlined.PushPin,
-                            contentDescription = if (vm.fijada) "Desfijar" else "Fijar"
+                            if (vm.pinned) Icons.Filled.PushPin else Icons.Outlined.PushPin,
+                            contentDescription = if (vm.pinned) "Desfijar" else "Fijar"
                         )
                     }
-                    IconButton(onClick = { mostrarColores = !mostrarColores }) {
+                    IconButton(onClick = { showColors = !showColors }) {
                         Icon(Icons.Outlined.Palette, contentDescription = "Cambiar color")
                     }
-                    IconButton(onClick = { vm.borrar(); alVolver() }) {
+                    IconButton(onClick = { vm.delete(); onBack() }) {
                         Icon(Icons.Outlined.Delete, contentDescription = "Borrar nota")
                     }
                 },
@@ -109,23 +109,23 @@ fun EditorScreen(
             )
         }
     ) { padding ->
-        val mostrarAnalisis = vm.preferencias.mostrarAnalisis
-        val analisis = if (mostrarAnalisis) vm.analisis else null
-        val elegido = vm.recursoElegido
-        val resaltado = remember(analisis, elegido) {
-            if (analisis != null && elegido != null) resaltadoDe(analisis, elegido) else null
+        val showAnalysis = vm.preferences.showAnalysis
+        val analysis = if (showAnalysis) vm.analysis else null
+        val selected = vm.selectedDevice
+        val highlight = remember(analysis, selected) {
+            if (analysis != null && selected != null) highlightFor(analysis, selected) else null
         }
         val scroll = rememberScrollState()
-        val densidad = LocalDensity.current
-        var yVersos by remember { mutableFloatStateOf(0f) }
-        var layoutVersos by remember { mutableStateOf<TextLayoutResult?>(null) }
+        val density = LocalDensity.current
+        var versesY by remember { mutableFloatStateOf(0f) }
+        var versesLayout by remember { mutableStateOf<TextLayoutResult?>(null) }
 
-        // Al elegir un recurso, lleva a la vista su primer verso
-        LaunchedEffect(elegido) {
-            val l = layoutVersos ?: return@LaunchedEffect
-            val inicio = resaltado?.rangos?.firstOrNull()?.first ?: return@LaunchedEffect
-            if (inicio > l.layoutInput.text.length) return@LaunchedEffect
-            val y = yVersos + l.getLineTop(l.getLineForOffset(inicio)) - with(densidad) { 48.dp.toPx() }
+        // When a device is selected, scroll its first verse into view
+        LaunchedEffect(selected) {
+            val l = versesLayout ?: return@LaunchedEffect
+            val start = highlight?.ranges?.firstOrNull()?.first ?: return@LaunchedEffect
+            if (start > l.layoutInput.text.length) return@LaunchedEffect
+            val y = versesY + l.getLineTop(l.getLineForOffset(start)) - with(density) { 48.dp.toPx() }
             scroll.animateScrollTo(y.toInt().coerceAtLeast(0))
         }
 
@@ -136,85 +136,84 @@ fun EditorScreen(
                 .imePadding()
                 .fillMaxSize()
         ) {
-            AnimatedVisibility(visible = mostrarColores) {
-                SelectorColor(seleccionado = vm.color, alElegir = vm::cambiarColor)
+            AnimatedVisibility(visible = showColors) {
+                ColorPicker(selected = vm.color, onSelect = vm::updateColor)
             }
-            if (vm.cargando) return@Column
+            if (vm.loading) return@Column
 
             Column(Modifier.weight(1f).verticalScroll(scroll)) {
                 Row(
                     horizontalArrangement = Arrangement.spacedBy(8.dp),
                     modifier = Modifier.padding(horizontal = 16.dp)
                 ) {
-                    TipoNota.entries.forEach { t ->
+                    NoteType.entries.forEach { t ->
                         FilterChip(
-                            selected = vm.tipo == t,
-                            onClick = { vm.cambiarTipo(t) },
-                            label = { Text(t.nombre) }
+                            selected = vm.type == t,
+                            onClick = { vm.updateType(t) },
+                            label = { Text(t.label) }
                         )
                     }
                 }
 
                 TextField(
-                    value = vm.titulo,
-                    onValueChange = vm::cambiarTitulo,
-                    placeholder = { Text("Título", style = EstiloVerso.titulo) },
-                    textStyle = EstiloVerso.titulo,
+                    value = vm.title,
+                    onValueChange = vm::updateTitle,
+                    placeholder = { Text("Título", style = VerseStyle.title) },
+                    textStyle = VerseStyle.title,
                     maxLines = 3,
                     keyboardOptions = KeyboardOptions(capitalization = KeyboardCapitalization.Sentences),
-                    colors = camposTransparentes(),
+                    colors = transparentFieldColors(),
                     modifier = Modifier.fillMaxWidth()
                 )
-                EditorVersos(
-                    valor = vm.contenido,
-                    alCambiar = vm::cambiarContenido,
-                    placeholder = if (vm.tipo == TipoNota.CANCION) "Escribe aquí tu letra…" else "Escribe aquí tus versos…",
-                    analisis = analisis,
-                    resaltado = resaltado,
-                    conMargen = mostrarAnalisis,
-                    alMedir = { layoutVersos = it },
-                    modifier = Modifier.onGloballyPositioned { yVersos = it.positionInParent().y }
+                VerseEditor(
+                    value = vm.content,
+                    onValueChange = vm::updateContent,
+                    placeholder = if (vm.type == NoteType.SONG) "Escribe aquí tu letra…" else "Escribe aquí tus versos…",
+                    analysis = analysis,
+                    highlight = highlight,
+                    showMargin = showAnalysis,
+                    onLayout = { versesLayout = it },
+                    modifier = Modifier.onGloballyPositioned { versesY = it.positionInParent().y }
                 )
             }
 
-            if (mostrarAnalisis) PanelAnalisis(
-                analisis = analisis,
-                elegido = elegido,
-                alElegir = vm::elegirRecurso,
-                seseo = vm.preferencias.seseo,
-                alCambiarSeseo = vm.preferencias::cambiarSeseo
+            if (showAnalysis) AnalysisPanel(
+                analysis = analysis,
+                selected = selected,
+                onSelect = vm::selectDevice,
+                seseo = vm.preferences.seseo,
+                onSeseoChange = vm.preferences::updateSeseo
             )
         }
     }
 }
 
-
 @Composable
-private fun SelectorColor(seleccionado: Int, alElegir: (Int) -> Unit) {
+private fun ColorPicker(selected: Int, onSelect: (Int) -> Unit) {
     Row(
         horizontalArrangement = Arrangement.spacedBy(10.dp),
         modifier = Modifier
             .horizontalScroll(rememberScrollState())
             .padding(horizontal = 16.dp, vertical = 8.dp)
     ) {
-        PaletaNotas.forEachIndexed { i, c ->
-            val elegido = i == seleccionado
+        NotePalette.forEachIndexed { i, c ->
+            val isSelected = i == selected
             Box(
                 contentAlignment = Alignment.Center,
                 modifier = Modifier
                     .size(36.dp)
                     .clip(CircleShape)
-                    .background(fondoNota(i))           // el mismo fondo que tendrá la nota
+                    .background(noteBackground(i))           // the same background the note will have
                     .border(
-                        width = if (elegido) 2.dp else 1.dp,
-                        color = if (elegido) MaterialTheme.colorScheme.primary
+                        width = if (isSelected) 2.dp else 1.dp,
+                        color = if (isSelected) MaterialTheme.colorScheme.primary
                                 else MaterialTheme.colorScheme.outlineVariant,
                         shape = CircleShape
                     )
-                    .clickable { alElegir(i) }
-                    .semantics { contentDescription = c.nombre }
+                    .clickable { onSelect(i) }
+                    .semantics { contentDescription = c.name }
             ) {
-                if (elegido) Icon(
+                if (isSelected) Icon(
                     Icons.Filled.Check, contentDescription = null,
                     tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(18.dp)
                 )
@@ -224,7 +223,7 @@ private fun SelectorColor(seleccionado: Int, alElegir: (Int) -> Unit) {
 }
 
 @Composable
-private fun camposTransparentes() = TextFieldDefaults.colors(
+private fun transparentFieldColors() = TextFieldDefaults.colors(
     focusedContainerColor = Color.Transparent,
     unfocusedContainerColor = Color.Transparent,
     disabledContainerColor = Color.Transparent,

@@ -1,5 +1,7 @@
 # Desarrollo
 
+[English](../development.md) · **Español**
+
 Guía para preparar el entorno, compilar, probar y contribuir.
 
 ## Versiones
@@ -142,6 +144,8 @@ Consejos:
   Desactívalo con `adb shell settings put secure stylus_handwriting_enabled 0`.
 - Desde Git Bash en Windows, antepón `MSYS_NO_PATHCONV=1` para que rutas como
   `/sdcard/ui.xml` no se conviertan en rutas de Windows.
+- Si las capturas salen en negro, la pantalla del emulador se ha dormido: despiértala con
+  `adb shell input keyevent 224` o mantenla encendida con `adb shell svc power stayon true`.
 
 ### Lista de comprobación manual del editor
 
@@ -197,20 +201,30 @@ puede eliminar código que solo se usa por reflexión.
    ```
 3. Instálala en el emulador o un móvil y repasa la lista de comprobación de arriba. Si
    había una build de depuración instalada, desinstálala antes (`adb uninstall
-   com.tuapp.verso`): las firmas no coinciden.
-4. Etiqueta y publica:
+   com.tuapp.verso`): las firmas no coinciden. Para comprobar que la actualización
+   conserva las notas, instala la versión nueva **encima** de la release anterior con
+   `adb install -r`.
+4. Etiqueta y publica (notas de la release en inglés, con una sección plegable en español):
    ```bash
    git tag -a v0.1.0 -m "Verso 0.1.0"
    git push origin v0.1.0
    cp app/build/outputs/apk/release/app-release.apk verso-0.1.0.apk
-   gh release create v0.1.0 verso-0.1.0.apk --title "Verso 0.1.0" --notes-file notas.md
+   gh release create v0.1.0 verso-0.1.0.apk --title "Verso 0.1.0" --notes-file notes.md
    ```
 
 ## Convenciones
 
-- **Idioma**: nombres de clases, funciones, variables, comentarios, commits e interfaz en
-  español (`alCambiar`, `resaltadoDe`, `Preferencias`). Los nombres de parámetros de
-  callbacks siguen el patrón `alHacerAlgo`.
+- **Idioma**:
+  - El código de la app (clases, funciones, variables, comentarios, nombres de archivos
+    y carpetas) está en **inglés**. Los parámetros de callbacks siguen el patrón
+    `onSomething` (`onValueChange`, `onSelect`).
+  - El **motor de análisis** (`analisis/` y sus tests) sigue en **español**: sus nombres
+    son términos de la métrica española (`silabas`, `sinalefa`, `rima asonante`) sin
+    equivalente exacto en inglés.
+  - Todo lo que ve el usuario (textos de la interfaz y resultados del análisis) está en
+    **español**.
+  - La documentación está en inglés, con copia en español en `docs/es/`. El README existe
+    en inglés (`README.md`) y en español (`README.es.md`). Mantén iguales las dos versiones.
 - **Motor sin Android**: nada en `analisis/` puede importar `android.*` ni
   `androidx.*`. Si algo necesita Android, va en `ui/` o `data/`.
 - **Tests**: todo cambio en el motor va con tests, preferiblemente con versos reales.
@@ -220,6 +234,9 @@ puede eliminar código que solo se usa por reflexión.
   detectados todavía."*).
 - **Diseño**: versos en serif con interlineado amplio; interfaz en la sans del sistema;
   sin sombras; colores del tema, nunca fijos (para que funcione el modo oscuro).
+- **Compatibilidad de la base de datos**: los nombres de tabla y columnas forman parte de
+  los datos guardados. No los cambies; para renombrar una propiedad de Kotlin, conserva la
+  columna con `@ColumnInfo(name = …)`.
 
 ## Cómo añadir un recurso literario
 
@@ -231,11 +248,11 @@ puede eliminar código que solo se usa por reflexión.
    verso entero si está vacía), añade un caso en `AnalisisPoema.rangos`.
 4. Tests en `RecursosTest` (que lo detecta y que **no** da falsos positivos en versos
    conocidos) y, si tocaste `rangos`, en `AnalisisPoemaTest`.
-5. Documenta la regla en [motor-de-analisis.md](motor-de-analisis.md).
+5. Documenta la regla en [analysis-engine.md](analysis-engine.md) (y en su versión en inglés).
 
 ## Cómo cambiar el modelo de datos
 
-`VersoDatabase` está en la versión 1 sin esquema exportado. Para añadir un campo a `Nota`
+`VersoDatabase` está en la versión 1 sin esquema exportado. Para añadir un campo a `Note`
 (por ejemplo, etiquetas):
 
 1. Añade el campo con valor por defecto.
@@ -259,6 +276,7 @@ puede eliminar código que solo se usa por reflexión.
 | `SDK location not found` | Falta `local.properties` con `sdk.dir` |
 | `gradlew` no se ejecuta en Linux/macOS | `chmod +x gradlew`; comprueba que tiene finales de línea LF |
 | `Android Emulator hypervisor driver is not installed` / el emulador no arranca | Activa la Plataforma del hipervisor de Windows y reinicia |
+| `Platform declaration clash` en `setX(…)` | Una `var x … private set` ya genera `setX`: usa otro nombre para la función (`updateX`) |
 | Error de API experimental (`This foundation API is experimental…`) | Añade `@OptIn(ExperimentalFoundationApi::class)` o `ExperimentalLayoutApi` en la función |
 | El texto escrito con `adb input` no aparece | Tutorial de lápiz de Gboard abierto; ver [Consejos](#probar-a-mano-con-adb) |
-| La app se cierra al abrir tras cambiar `Nota` | Falta la migración de Room (ver arriba) |
+| La app se cierra al abrir tras cambiar `Note` | Falta la migración de Room (ver arriba) |

@@ -15,10 +15,10 @@ import androidx.lifecycle.viewmodel.viewModelFactory
 import com.tuapp.VersoApp
 import com.tuapp.analisis.AnalisisPoema
 import com.tuapp.analisis.Recursos
-import com.tuapp.data.Nota
-import com.tuapp.data.NotasRepositorio
-import com.tuapp.data.Preferencias
-import com.tuapp.data.TipoNota
+import com.tuapp.data.Note
+import com.tuapp.data.NoteType
+import com.tuapp.data.NotesRepository
+import com.tuapp.data.Preferences
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -35,112 +35,112 @@ import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
 
 /**
- * Estado del editor con autoguardado:
- * - guarda 600 ms después del último cambio;
- * - guarda al salir (en el ámbito de la app, que sobrevive a la pantalla);
- * - una nota que se deja vacía se descarta, como en Keep.
- * El Mutex evita que dos guardados simultáneos inserten la misma nota dos veces.
+ * Editor state with autosave:
+ * - saves 600 ms after the last change;
+ * - saves when leaving (in the app scope, which outlives the screen);
+ * - a note left empty is discarded, as in Keep.
+ * The Mutex stops two simultaneous saves from inserting the same note twice.
  *
- * El análisis (sílabas, rimas, recursos) se recalcula 300 ms después del
- * último cambio, fuera del hilo principal.
+ * The analysis (syllables, rhymes, literary devices) is recomputed 300 ms
+ * after the last change, off the main thread.
  */
 @OptIn(FlowPreview::class, ExperimentalCoroutinesApi::class)
 class EditorViewModel(
-    private val repo: NotasRepositorio,
-    private val scopeApp: CoroutineScope,
-    val preferencias: Preferencias,
-    estado: SavedStateHandle
+    private val repo: NotesRepository,
+    private val appScope: CoroutineScope,
+    val preferences: Preferences,
+    state: SavedStateHandle
 ) : ViewModel() {
 
-    private var id: Long = estado["id"] ?: 0L
-    private var creada = System.currentTimeMillis()
+    private var id: Long = state["id"] ?: 0L
+    private var created = System.currentTimeMillis()
 
-    var titulo by mutableStateOf(""); private set
-    var contenido by mutableStateOf(""); private set
-    var tipo by mutableStateOf(TipoNota.POEMA); private set
+    var title by mutableStateOf(""); private set
+    var content by mutableStateOf(""); private set
+    var type by mutableStateOf(NoteType.POEM); private set
     var color by mutableIntStateOf(0); private set
-    var fijada by mutableStateOf(false); private set
-    var cargando by mutableStateOf(id != 0L); private set
+    var pinned by mutableStateOf(false); private set
+    var loading by mutableStateOf(id != 0L); private set
 
-    /** Último análisis; puede ir por detrás del texto mientras se escribe. */
-    var analisis by mutableStateOf<AnalisisPoema.Resultado?>(null); private set
-    var recursoElegido by mutableStateOf<Recursos.Recurso?>(null); private set
+    /** Latest analysis; it may lag behind the text while typing. */
+    var analysis by mutableStateOf<AnalisisPoema.Resultado?>(null); private set
+    var selectedDevice by mutableStateOf<Recursos.Recurso?>(null); private set
 
-    private var hayCambios = false
-    private var borrada = false
-    private var guardadoPendiente: Job? = null
+    private var hasChanges = false
+    private var deleted = false
+    private var pendingSave: Job? = null
     private val mutex = Mutex()
 
     init {
         if (id != 0L) viewModelScope.launch {
-            repo.obtener(id)?.let {
-                titulo = it.titulo; contenido = it.contenido; tipo = it.tipo
-                color = it.color; fijada = it.fijada; creada = it.creada
+            repo.get(id)?.let {
+                title = it.title; content = it.content; type = it.type
+                color = it.color; pinned = it.pinned; created = it.created
             }
-            cargando = false
+            loading = false
         }
         viewModelScope.launch {
-            snapshotFlow { Triple(contenido, preferencias.seseo, preferencias.mostrarAnalisis) }
+            snapshotFlow { Triple(content, preferences.seseo, preferences.showAnalysis) }
                 .filter { it.third }
                 .debounce(300)
-                .mapLatest { (texto, seseo) ->
-                    withContext(Dispatchers.Default) { AnalisisPoema.analizar(texto, seseo) }
+                .mapLatest { (text, seseo) ->
+                    withContext(Dispatchers.Default) { AnalisisPoema.analizar(text, seseo) }
                 }
                 .collect { r ->
-                    analisis = r
-                    if (recursoElegido !in r.recursos) recursoElegido = null
+                    analysis = r
+                    if (selectedDevice !in r.recursos) selectedDevice = null
                 }
         }
     }
 
-    fun cambiarTitulo(t: String) { titulo = t; programarGuardado() }
-    fun cambiarContenido(t: String) { contenido = t; programarGuardado() }
-    fun cambiarTipo(t: TipoNota) { tipo = t; programarGuardado() }
-    fun cambiarColor(c: Int) { color = c; programarGuardado() }
-    fun alternarFijada() { fijada = !fijada; programarGuardado() }
+    fun updateTitle(t: String) { title = t; scheduleSave() }
+    fun updateContent(t: String) { content = t; scheduleSave() }
+    fun updateType(t: NoteType) { type = t; scheduleSave() }
+    fun updateColor(c: Int) { color = c; scheduleSave() }
+    fun togglePinned() { pinned = !pinned; scheduleSave() }
 
-    /** Toca un recurso para resaltarlo; tocarlo otra vez lo deselecciona. */
-    fun elegirRecurso(r: Recursos.Recurso) {
-        recursoElegido = if (recursoElegido == r) null else r
+    /** Tapping a device highlights it; tapping it again clears the selection. */
+    fun selectDevice(d: Recursos.Recurso) {
+        selectedDevice = if (selectedDevice == d) null else d
     }
 
-    fun borrar() {
-        borrada = true
-        guardadoPendiente?.cancel()
-        scopeApp.launch { mutex.withLock { if (id != 0L) repo.borrar(id) } }
+    fun delete() {
+        deleted = true
+        pendingSave?.cancel()
+        appScope.launch { mutex.withLock { if (id != 0L) repo.delete(id) } }
     }
 
-    private fun programarGuardado() {
-        hayCambios = true
-        guardadoPendiente?.cancel()
-        guardadoPendiente = viewModelScope.launch {
+    private fun scheduleSave() {
+        hasChanges = true
+        pendingSave?.cancel()
+        pendingSave = viewModelScope.launch {
             delay(600)
-            guardar()
+            save()
         }
     }
 
-    private fun estaVacia() = titulo.isBlank() && contenido.isBlank()
+    private fun isEmpty() = title.isBlank() && content.isBlank()
 
-    private fun nota() = Nota(
-        id = id, titulo = titulo, contenido = contenido, tipo = tipo,
-        color = color, fijada = fijada, creada = creada, modificada = System.currentTimeMillis()
+    private fun note() = Note(
+        id = id, title = title, content = content, type = type,
+        color = color, pinned = pinned, created = created, modified = System.currentTimeMillis()
     )
 
-    private suspend fun guardar() = mutex.withLock {
-        if (!hayCambios || borrada || estaVacia()) return@withLock
-        // NonCancellable: si se inserta la nota, el id nuevo no debe perderse
-        withContext(NonCancellable) { id = repo.guardar(nota()) }
-        hayCambios = false
+    private suspend fun save() = mutex.withLock {
+        if (!hasChanges || deleted || isEmpty()) return@withLock
+        // NonCancellable: if the note gets inserted, the new id must not be lost
+        withContext(NonCancellable) { id = repo.save(note()) }
+        hasChanges = false
     }
 
     override fun onCleared() {
-        guardadoPendiente?.cancel()
-        if (borrada) return
-        scopeApp.launch {
+        pendingSave?.cancel()
+        if (deleted) return
+        appScope.launch {
             mutex.withLock {
                 when {
-                    estaVacia() && id != 0L -> repo.borrar(id)
-                    !estaVacia() && hayCambios -> id = repo.guardar(nota())
+                    isEmpty() && id != 0L -> repo.delete(id)
+                    !isEmpty() && hasChanges -> id = repo.save(note())
                 }
             }
         }
@@ -150,7 +150,7 @@ class EditorViewModel(
         val Factory = viewModelFactory {
             initializer {
                 val app = this[APPLICATION_KEY] as VersoApp
-                EditorViewModel(app.repositorio, app.scopeApp, app.preferencias, createSavedStateHandle())
+                EditorViewModel(app.repository, app.appScope, app.preferences, createSavedStateHandle())
             }
         }
     }

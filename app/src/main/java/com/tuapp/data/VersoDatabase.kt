@@ -4,14 +4,16 @@ import android.content.Context
 import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
+import androidx.room.TypeConverters
 
-@Database(entities = [Nota::class], version = 1, exportSchema = false)
+@Database(entities = [Note::class], version = 1, exportSchema = false)
+@TypeConverters(Converters::class)
 abstract class VersoDatabase : RoomDatabase() {
 
-    abstract fun notaDao(): NotaDao
+    abstract fun noteDao(): NoteDao
 
     companion object {
-        fun crear(context: Context): VersoDatabase =
+        fun create(context: Context): VersoDatabase =
             Room.databaseBuilder(context, VersoDatabase::class.java, "verso.db").build()
     }
 }

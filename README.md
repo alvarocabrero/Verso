@@ -12,9 +12,9 @@ alliteration, anaphora or parallelism.
 The app's interface and analysis are in Spanish, and it is designed for Spanish verse.
 
 <p align="center">
-  <img src="docs/capturas/editor-margen.png" width="240" alt="Editor with syllables and rhymes in the margin">
-  <img src="docs/capturas/recurso-resaltado.png" width="240" alt="Anadiplosis highlighted in the text">
-  <img src="docs/capturas/aliteracion-posible-oscuro.png" width="240" alt="Possible alliteration in dark mode">
+  <img src="docs/screenshots/editor-margin.png" width="240" alt="Editor with syllables and rhymes in the margin">
+  <img src="docs/screenshots/device-highlighted.png" width="240" alt="Anadiplosis highlighted in the text">
+  <img src="docs/screenshots/alliteration-possible-dark.png" width="240" alt="Possible alliteration in dark mode">
 </p>
 
 ## Features
@@ -77,7 +77,7 @@ cd Verso
 
 The debug APK ends up in `app/build/outputs/apk/debug/app-debug.apk`.
 The full environment guide (JDK, SDK, emulator on Windows) is in
-[docs/desarrollo.md](docs/desarrollo.md) (Spanish).
+[docs/development.md](docs/development.md).
 
 ## Project layout
 
@@ -85,25 +85,25 @@ The full environment guide (JDK, SDK, emulator on Windows) is in
 app/src/main/java/com/tuapp/
   VersoApp.kt          Application: hand-rolled dependency container (no Hilt)
   MainActivity.kt      Navigation: note list and editor
-  data/                Room (Nota, NotaDao, VersoDatabase), repository and preferences
-  ui/notas/            Home screen: search and card grid
+  data/                Room (Note, NoteDao, VersoDatabase), repository and preferences
+  ui/notes/            Home screen: search and card grid
   ui/editor/           Editor with autosave and real-time analysis
   ui/theme/            "Ink on paper" theme, verse text styles and note palette
   analisis/            Analysis engine in pure Kotlin (no Android dependencies)
 app/src/test/java/com/tuapp/analisis/   JUnit tests for the engine (48)
-docs/                  Technical documentation
+docs/                  Technical documentation (docs/es/: Spanish copy)
 ```
 
 ## Documentation
 
-The technical documentation is written in Spanish:
-
 | Document | Contents |
 |---|---|
-| [Arquitectura](docs/arquitectura.md) | Architecture: layers, data flow, autosave, threading, navigation |
-| [Motor de análisis](docs/motor-de-analisis.md) | Analysis engine: syllabification, metre, rhyme and devices (rules, algorithms, API) |
+| [Architecture](docs/architecture.md) | Layers, data flow, autosave, threading, navigation |
+| [Analysis engine](docs/analysis-engine.md) | Syllabification, metre, rhyme and literary devices: rules, algorithms and API |
 | [Editor](docs/editor.md) | How the analysis is shown in the UI: margin, highlighting, panel |
-| [Desarrollo](docs/desarrollo.md) | Development: environment, build, tests, emulator, releases, conventions, troubleshooting |
+| [Development](docs/development.md) | Environment, build, tests, emulator, releases, conventions, troubleshooting |
+
+A Spanish copy of every document is in [docs/es/](docs/es/).
 
 ## Known limitations
 
@@ -124,5 +124,8 @@ The technical documentation is written in Spanish:
 
 ## Conventions
 
-All code, comments and UI text are in Spanish. The analysis engine does not depend on
-Android, and every change to it comes with tests.
+- App code, file and folder names are in English.
+- The analysis engine (`analisis/`) keeps its Spanish names, since they are Spanish
+  metrics terms (*sílaba*, *sinalefa*, *rima asonante*). It does not depend on Android,
+  and every change to it comes with tests.
+- Everything the user sees in the app is in Spanish.

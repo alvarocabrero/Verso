@@ -12,38 +12,38 @@ import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.sp
 
-// Tinta índigo sobre papel frío: un cuaderno, no un tablero de tareas.
-private val Tinta = Color(0xFF2E3A6E)
-private val TintaClara = Color(0xFFB9C3F0)
-private val Papel = Color(0xFFF6F7F9)
-private val PapelNoche = Color(0xFF15171D)
+// Indigo ink on cool paper: a notebook, not a task board.
+private val Ink = Color(0xFF2E3A6E)
+private val LightInk = Color(0xFFB9C3F0)
+private val Paper = Color(0xFFF6F7F9)
+private val NightPaper = Color(0xFF15171D)
 
-private val Claro = lightColorScheme(
-    primary = Tinta,
+private val LightColors = lightColorScheme(
+    primary = Ink,
     onPrimary = Color.White,
     primaryContainer = Color(0xFFDDE2F7),
     onPrimaryContainer = Color(0xFF17204A),
     secondaryContainer = Color(0xFFE3E6F1),
     onSecondaryContainer = Color(0xFF1E2438),
-    background = Papel,
+    background = Paper,
     onBackground = Color(0xFF1B1D24),
-    surface = Papel,
+    surface = Paper,
     onSurface = Color(0xFF1B1D24),
     surfaceVariant = Color(0xFFE7E9EF),
     onSurfaceVariant = Color(0xFF4A4E5C),
     outlineVariant = Color(0xFFD3D6E0)
 )
 
-private val Oscuro = darkColorScheme(
-    primary = TintaClara,
+private val DarkColors = darkColorScheme(
+    primary = LightInk,
     onPrimary = Color(0xFF1A2350),
     primaryContainer = Color(0xFF34406F),
     onPrimaryContainer = Color(0xFFDDE2F7),
     secondaryContainer = Color(0xFF2E3242),
     onSecondaryContainer = Color(0xFFDFE2EE),
-    background = PapelNoche,
+    background = NightPaper,
     onBackground = Color(0xFFE4E5EB),
-    surface = PapelNoche,
+    surface = NightPaper,
     onSurface = Color(0xFFE4E5EB),
     surfaceVariant = Color(0xFF262933),
     onSurfaceVariant = Color(0xFFB8BBC8),
@@ -51,19 +51,19 @@ private val Oscuro = darkColorScheme(
 )
 
 /**
- * Estilos para el texto creativo. La interfaz usa la sans del sistema;
- * los versos, una serif con interlineado amplio para leer verso a verso.
+ * Styles for the creative text. The UI uses the system sans serif;
+ * verses use a serif with generous line height, to read line by line.
  */
-object EstiloVerso {
-    val cuerpo = TextStyle(fontFamily = FontFamily.Serif, fontSize = 18.sp, lineHeight = 30.sp)
-    val titulo = TextStyle(
+object VerseStyle {
+    val body = TextStyle(fontFamily = FontFamily.Serif, fontSize = 18.sp, lineHeight = 30.sp)
+    val title = TextStyle(
         fontFamily = FontFamily.Serif, fontSize = 26.sp, lineHeight = 34.sp, fontWeight = FontWeight.SemiBold
     )
-    val tarjetaTitulo = TextStyle(
+    val cardTitle = TextStyle(
         fontFamily = FontFamily.Serif, fontSize = 17.sp, lineHeight = 22.sp, fontWeight = FontWeight.SemiBold
     )
-    val tarjetaCuerpo = TextStyle(fontFamily = FontFamily.Serif, fontSize = 14.sp, lineHeight = 21.sp)
-    val vacio = TextStyle(
+    val cardBody = TextStyle(fontFamily = FontFamily.Serif, fontSize = 14.sp, lineHeight = 21.sp)
+    val empty = TextStyle(
         fontFamily = FontFamily.Serif, fontSize = 22.sp, lineHeight = 30.sp, fontStyle = FontStyle.Italic
     )
 }
@@ -71,7 +71,7 @@ object EstiloVerso {
 @Composable
 fun VersoTheme(content: @Composable () -> Unit) {
     MaterialTheme(
-        colorScheme = if (isSystemInDarkTheme()) Oscuro else Claro,
+        colorScheme = if (isSystemInDarkTheme()) DarkColors else LightColors,
         content = content
     )
 }

@@ -1,5 +1,7 @@
 # Motor de análisis
 
+[English](../analysis-engine.md) · **Español**
+
 Paquete `com.tuapp.analisis`. Kotlin puro, sin dependencias de Android: se prueba con
 JUnit en la JVM (`./gradlew testDebugUnitTest`).
 

@@ -7,29 +7,29 @@ import androidx.room.Update
 import kotlinx.coroutines.flow.Flow
 
 @Dao
-interface NotaDao {
+interface NoteDao {
 
     @Query("SELECT * FROM notas ORDER BY fijada DESC, modificada DESC")
-    fun observarTodas(): Flow<List<Nota>>
+    fun observeAll(): Flow<List<Note>>
 
     @Query(
         """
         SELECT * FROM notas
-        WHERE titulo LIKE '%' || :texto || '%' OR contenido LIKE '%' || :texto || '%'
+        WHERE titulo LIKE '%' || :text || '%' OR contenido LIKE '%' || :text || '%'
         ORDER BY fijada DESC, modificada DESC
         """
     )
-    fun buscar(texto: String): Flow<List<Nota>>
+    fun search(text: String): Flow<List<Note>>
 
     @Query("SELECT * FROM notas WHERE id = :id")
-    suspend fun obtener(id: Long): Nota?
+    suspend fun get(id: Long): Note?
 
     @Insert
-    suspend fun insertar(nota: Nota): Long
+    suspend fun insert(note: Note): Long
 
     @Update
-    suspend fun actualizar(nota: Nota)
+    suspend fun update(note: Note)
 
     @Query("DELETE FROM notas WHERE id = :id")
-    suspend fun borrar(id: Long)
+    suspend fun delete(id: Long)
 }

@@ -10,9 +10,9 @@ métricas de cada verso, detecta el esquema de rima y señala recursos literario
 aliteración, la anáfora o el paralelismo.
 
 <p align="center">
-  <img src="docs/capturas/editor-margen.png" width="240" alt="Editor con sílabas y rimas al margen">
-  <img src="docs/capturas/recurso-resaltado.png" width="240" alt="Anadiplosis resaltada en el texto">
-  <img src="docs/capturas/aliteracion-posible-oscuro.png" width="240" alt="Aliteración posible en modo oscuro">
+  <img src="docs/screenshots/editor-margin.png" width="240" alt="Editor con sílabas y rimas al margen">
+  <img src="docs/screenshots/device-highlighted.png" width="240" alt="Anadiplosis resaltada en el texto">
+  <img src="docs/screenshots/alliteration-possible-dark.png" width="240" alt="Aliteración posible en modo oscuro">
 </p>
 
 ## Qué hace
@@ -71,7 +71,7 @@ cd Verso
 
 El APK de depuración queda en `app/build/outputs/apk/debug/app-debug.apk`.
 La guía completa del entorno (JDK, SDK, emulador en Windows) está en
-[docs/desarrollo.md](docs/desarrollo.md).
+[docs/es/development.md](docs/es/development.md).
 
 ## Estructura
 
@@ -79,23 +79,25 @@ La guía completa del entorno (JDK, SDK, emulador en Windows) está en
 app/src/main/java/com/tuapp/
   VersoApp.kt          Application: contenedor de dependencias (sin Hilt)
   MainActivity.kt      Navegación: lista de notas y editor
-  data/                Room (Nota, NotaDao, VersoDatabase), repositorio y preferencias
-  ui/notas/            Pantalla principal: búsqueda y cuadrícula de tarjetas
+  data/                Room (Note, NoteDao, VersoDatabase), repositorio y preferencias
+  ui/notes/            Pantalla principal: búsqueda y cuadrícula de tarjetas
   ui/editor/           Editor con autoguardado y análisis en tiempo real
   ui/theme/            Tema "tinta sobre papel", estilos de verso y paleta de notas
   analisis/            Motor de análisis en Kotlin puro (sin Android)
 app/src/test/java/com/tuapp/analisis/   Tests JUnit del motor (48)
-docs/                  Documentación técnica
+docs/                  Documentación técnica en inglés (docs/es/: en español)
 ```
 
 ## Documentación
 
 | Documento | Contenido |
 |---|---|
-| [Arquitectura](docs/arquitectura.md) | Capas, flujo de datos, autoguardado, hilos, navegación |
-| [Motor de análisis](docs/motor-de-analisis.md) | Silabeo, métrica, rima y recursos: reglas, algoritmos y API |
-| [Editor](docs/editor.md) | Cómo se integra el análisis en la interfaz: margen, resaltado, panel |
-| [Desarrollo](docs/desarrollo.md) | Entorno, compilación, tests, emulador, convenciones y resolución de problemas |
+| [Arquitectura](docs/es/architecture.md) | Capas, flujo de datos, autoguardado, hilos, navegación |
+| [Motor de análisis](docs/es/analysis-engine.md) | Silabeo, métrica, rima y recursos: reglas, algoritmos y API |
+| [Editor](docs/es/editor.md) | Cómo se integra el análisis en la interfaz: margen, resaltado, panel |
+| [Desarrollo](docs/es/development.md) | Entorno, compilación, tests, emulador, publicación, convenciones y resolución de problemas |
+
+La versión en inglés de cada documento está en [docs/](docs/).
 
 ## Limitaciones conocidas
 
@@ -115,5 +117,8 @@ docs/                  Documentación técnica
 
 ## Convenciones
 
-Todo el código, los comentarios y la interfaz están en español. El motor de análisis no
-depende de Android y cada cambio en él va acompañado de tests.
+- El código de la app y los nombres de archivos y carpetas están en inglés.
+- El motor de análisis (`analisis/`) conserva sus nombres en español, porque son términos
+  de la métrica española (*sílaba*, *sinalefa*, *rima asonante*). No depende de Android y
+  cada cambio en él va acompañado de tests.
+- Todo lo que el usuario ve en la app está en español.

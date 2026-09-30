@@ -1,4 +1,4 @@
-package com.tuapp.ui.notas
+package com.tuapp.ui.notes
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Arrangement
@@ -40,33 +40,33 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.tuapp.data.Nota
-import com.tuapp.ui.theme.EstiloVerso
-import com.tuapp.ui.theme.fondoNota
+import com.tuapp.data.Note
+import com.tuapp.ui.theme.VerseStyle
+import com.tuapp.ui.theme.noteBackground
 
 @Composable
-fun NotasScreen(
-    abrirNota: (Long) -> Unit,               // 0 = nota nueva
-    vm: NotasViewModel = viewModel(factory = NotasViewModel.Factory)
+fun NotesScreen(
+    openNote: (Long) -> Unit,                // 0 = new note
+    vm: NotesViewModel = viewModel(factory = NotesViewModel.Factory)
 ) {
-    val notas by vm.notas.collectAsStateWithLifecycle()
-    val busqueda by vm.busqueda.collectAsStateWithLifecycle()
+    val notes by vm.notes.collectAsStateWithLifecycle()
+    val query by vm.query.collectAsStateWithLifecycle()
 
     Scaffold(
         floatingActionButton = {
             FloatingActionButton(
-                onClick = { abrirNota(0L) },
+                onClick = { openNote(0L) },
                 containerColor = MaterialTheme.colorScheme.primary,
                 contentColor = MaterialTheme.colorScheme.onPrimary
             ) { Icon(Icons.Filled.Add, contentDescription = "Nueva nota") }
         }
     ) { padding ->
         Column(Modifier.padding(padding).fillMaxSize()) {
-            CampoBusqueda(busqueda, vm::buscar)
-            val lista = notas
+            SearchField(query, vm::search)
+            val list = notes
             when {
-                lista == null -> Unit
-                lista.isEmpty() -> Vacio(busqueda)
+                list == null -> Unit
+                list.isEmpty() -> EmptyState(query)
                 else -> LazyVerticalStaggeredGrid(
                     columns = StaggeredGridCells.Adaptive(160.dp),
                     contentPadding = PaddingValues(start = 12.dp, end = 12.dp, top = 4.dp, bottom = 96.dp),
@@ -74,8 +74,8 @@ fun NotasScreen(
                     horizontalArrangement = Arrangement.spacedBy(10.dp),
                     modifier = Modifier.fillMaxSize()
                 ) {
-                    items(lista, key = { it.id }) { nota ->
-                        TarjetaNota(nota, onClick = { abrirNota(nota.id) })
+                    items(list, key = { it.id }) { note ->
+                        NoteCard(note, onClick = { openNote(note.id) })
                     }
                 }
             }
@@ -84,14 +84,14 @@ fun NotasScreen(
 }
 
 @Composable
-private fun CampoBusqueda(texto: String, alCambiar: (String) -> Unit) {
+private fun SearchField(text: String, onChange: (String) -> Unit) {
     TextField(
-        value = texto,
-        onValueChange = alCambiar,
+        value = text,
+        onValueChange = onChange,
         placeholder = { Text("Buscar en tus notas") },
         leadingIcon = { Icon(Icons.Filled.Search, contentDescription = null) },
         trailingIcon = {
-            if (texto.isNotEmpty()) IconButton(onClick = { alCambiar("") }) {
+            if (text.isNotEmpty()) IconButton(onClick = { onChange("") }) {
                 Icon(Icons.Filled.Close, contentDescription = "Borrar búsqueda")
             }
         },
@@ -108,23 +108,23 @@ private fun CampoBusqueda(texto: String, alCambiar: (String) -> Unit) {
 }
 
 @Composable
-private fun TarjetaNota(nota: Nota, onClick: () -> Unit) {
+private fun NoteCard(note: Note, onClick: () -> Unit) {
     Surface(
         onClick = onClick,
         shape = RoundedCornerShape(14.dp),
-        color = fondoNota(nota.color),
-        border = if (nota.color == 0) BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant) else null
+        color = noteBackground(note.color),
+        border = if (note.color == 0) BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant) else null
     ) {
         Column(Modifier.padding(14.dp)) {
-            if (nota.titulo.isNotBlank()) {
-                Text(nota.titulo, style = EstiloVerso.tarjetaTitulo, maxLines = 2, overflow = TextOverflow.Ellipsis)
+            if (note.title.isNotBlank()) {
+                Text(note.title, style = VerseStyle.cardTitle, maxLines = 2, overflow = TextOverflow.Ellipsis)
                 Spacer(Modifier.height(6.dp))
             }
-            if (nota.contenido.isNotBlank()) {
-                // Se respetan los saltos de verso: un poema no se lee como un párrafo.
+            if (note.content.isNotBlank()) {
+                // Line breaks are kept: a poem is not read as a paragraph.
                 Text(
-                    nota.contenido.trim().lines().take(8).joinToString("\n"),
-                    style = EstiloVerso.tarjetaCuerpo,
+                    note.content.trim().lines().take(8).joinToString("\n"),
+                    style = VerseStyle.cardBody,
                     maxLines = 8,
                     overflow = TextOverflow.Ellipsis
                 )
@@ -132,12 +132,12 @@ private fun TarjetaNota(nota: Nota, onClick: () -> Unit) {
             Spacer(Modifier.height(10.dp))
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Text(
-                    nota.tipo.nombre,
+                    note.type.label,
                     style = MaterialTheme.typography.labelSmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
                 Spacer(Modifier.weight(1f))
-                if (nota.fijada) Icon(
+                if (note.pinned) Icon(
                     Icons.Filled.PushPin,
                     contentDescription = "Fijada",
                     tint = MaterialTheme.colorScheme.onSurfaceVariant,
@@ -149,15 +149,15 @@ private fun TarjetaNota(nota: Nota, onClick: () -> Unit) {
 }
 
 @Composable
-private fun Vacio(busqueda: String) {
+private fun EmptyState(query: String) {
     Box(Modifier.fillMaxSize().padding(32.dp), contentAlignment = Alignment.Center) {
         Column(horizontalAlignment = Alignment.CenterHorizontally) {
             Text(
-                if (busqueda.isBlank()) "La página está en blanco" else "Ninguna nota contiene «$busqueda»",
-                style = EstiloVerso.vacio,
+                if (query.isBlank()) "La página está en blanco" else "Ninguna nota contiene «$query»",
+                style = VerseStyle.empty,
                 textAlign = TextAlign.Center
             )
-            if (busqueda.isBlank()) {
+            if (query.isBlank()) {
                 Spacer(Modifier.height(8.dp))
                 Text(
                     "Toca + para escribir tu primer verso.",
