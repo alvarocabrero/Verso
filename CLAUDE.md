@@ -158,3 +158,7 @@ detection with a language model.
 - Names in English for app code, Spanish in the analysis engine (see Language).
 - The analysis engine must not depend on Android; every change to it comes with tests.
 - If you change engine or editor behaviour, update the matching doc in both languages.
+- Comments are in English everywhere (the engine included; only its code names stay Spanish)
+  and are written for a reader who doesn't know Kotlin or Android: a header per file, a
+  comment per declaration and step, Kotlin syntax explained the first time it appears in
+  each file. Keep that level of detail when adding or changing code.
