@@ -174,11 +174,13 @@ private val EXPLANATIONS = mapOf(
         "Los suspiros son aire y van al aire.\nLas lágrimas son agua y van al mar.",
         "Gustavo Adolfo Bécquer"
     ),
-    // *Rima interna* (internal rhyme): a rhyme inside a verse, or with the end of a nearby verse.
+    // *Rima interna* (internal rhyme): a rhyme inside a verse, or with the end of a verse of the
+    // stanza. Vowel-only rhymes (*asonante*) are softer and may appear by chance.
     Tipo.RIMA_INTERNA to DeviceExplanation(
         "Rima entre una palabra del interior de un verso y otra del mismo verso o del " +
-            "final de un verso vecino. Añade ecos dentro de las líneas y es muy habitual " +
-            "en letras de canciones y en el rap. Solo se señala la rima consonante.",
+            "final de un verso de la estrofa. Añade ecos dentro de las líneas y es muy habitual " +
+            "en letras de canciones y en el rap. Si solo coinciden las vocales (plata, ramas) " +
+            "es asonante: es más suave y a veces aparece por casualidad.",
         "tu corazón es mi canción,\nla luna duerme en la laguna"
     ),
     // *Estribillo* (refrain): a verse or verses repeated through the text. Lorca.

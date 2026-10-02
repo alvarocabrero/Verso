@@ -2,6 +2,17 @@
 
 **English** · [Español](CHANGELOG.es.md)
 
+## Unreleased
+
+On `main`, not yet in a published release.
+
+### Changed
+- **Internal rhymes: more are found.** Full rhymes are now searched across the whole stanza
+  (an inner word with the end of any of its lines, or with an inner word of the next line), and
+  **assonant** internal rhymes are detected too, near a line ending. They are labelled
+  *Rima interna · asonante* and coloured more softly; some will be coincidences. Words that
+  share a rhyme are grouped into one entry.
+
 ## 0.2.0 (2026-10-02)
 
 ### Added

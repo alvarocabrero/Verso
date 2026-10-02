@@ -226,14 +226,21 @@ class RecursosTest {
      * Pairs of lines where NOTHING must be found (Neruda and Garcilaso): repeating a word like
      * "escribir" in two lines is not, by itself, a device. `emptyList<Tipo>()` is an empty
      * list of types (the `<Tipo>` says what kind of list it is).
+     *
+     * The one exception is the vowel internal rhyme (*rima interna asonante*): it is common
+     * by nature, and Garcilaso's lines do have one ("vuestro" echoes "gesto" and "deseo").
+     * So the second check leaves those out (`filterNot` keeps the items that do NOT meet the
+     * condition) and a third one confirms that echo is found.
      */
     @Test fun sinFalsosPositivosEntreVersos() {
         assertEquals(emptyList<Tipo>(), tipos(
             "Puedo escribir los versos más tristes esta noche",
             "Escribir, por ejemplo: la noche está estrellada"))
-        assertEquals(emptyList<Tipo>(), tipos(
+        val garcilaso = Recursos.detectar(listOf(
             "Escrito está en mi alma vuestro gesto",
             "y cuanto yo escribir de vos deseo"))
+        assertEquals(emptyList<Tipo>(), garcilaso.filterNot { it.rima == Rima.Tipo.ASONANTE }.map { it.tipo })
+        assertEquals(listOf(listOf("vuestro", "gesto", "deseo")), garcilaso.map { it.palabras })
     }
 
     /**
@@ -249,8 +256,8 @@ class RecursosTest {
     }
 
     // ---------- Rima interna ----------
-    // Tests for *rima interna* (internal rhyme: a word inside a line rhymes fully with
-    // another word of the same line or with the end of a neighbour line).
+    // Tests for *rima interna* (internal rhyme: a word inside a line rhymes with
+    // another word of the same line or with the end of a line of the stanza).
 
     /**
      * Helper: detects the devices in [lineas] (any number of texts) and keeps only the
@@ -293,26 +300,89 @@ class RecursosTest {
     }
 
     /**
-     * "casa" / "caza" is NOT a full rhyme without *seseo* (so nothing is found), but it IS
-     * with `seseo = true` (then "s" and "z" sound the same). `.isEmpty()` is true when the
-     * list has no elements.
+     * A full internal rhyme reaches the end of ANY line of the stanza, not only a neighbour:
+     * "luna" (inside line 1) rhymes with "fortuna" (end of line 3). `rima` says it is a full
+     * rhyme (*consonante*).
+     */
+    @Test fun rimaInternaEnTodaLaEstrofa() {
+        val r = rimasInternas(
+            "La luna brilla en el cielo,",
+            "duerme el campo en la mañana,",
+            "y una estrella de fortuna"
+        )
+        assertEquals(1, r.size)
+        assertEquals(listOf(0, 2), r[0].lineas)
+        assertEquals(listOf("luna", "fortuna"), r[0].palabras)
+        assertEquals(Rima.Tipo.CONSONANTE, r[0].rima)
+    }
+
+    /** Two inner words of consecutive lines: "oscura" (line 1) and "amargura" (line 2). */
+    @Test fun rimaInternaEntreInterioresDeVersosSeguidos() {
+        val r = rimasInternas("la noche oscura se cierra", "con amargura en el alma")
+        assertEquals(listOf(listOf("oscura", "amargura")), r.map { it.palabras })
+        assertEquals(listOf(0, 1), r[0].lineas)
+    }
+
+    /**
+     * Several words with the same rhyme form ONE device: "canción" and "corazón" are inside
+     * their lines and both rhyme with "razón", the end of the second line.
+     */
+    @Test fun rimaInternaAgrupaLasPalabrasDeUnaMismaRima() {
+        val r = rimasInternas("esta canción no tiene dueño", "ni el corazón tiene razón")
+        assertEquals(1, r.size)
+        assertEquals("«canción» · «corazón» · «razón»", r[0].evidencia)
+    }
+
+    /**
+     * Vowel rhyme (*rima asonante*): "casa" and "blanca" share the vowels a-a with "plaza",
+     * the end of their line. It is found, and marked as *asonante*.
+     */
+    @Test fun rimaInternaAsonante() {
+        val r = rimasInternas("la casa blanca de la plaza")
+        assertEquals(1, r.size)
+        assertEquals(listOf("casa", "blanca", "plaza"), r[0].palabras)
+        assertEquals(Rima.Tipo.ASONANTE, r[0].rima)
+    }
+
+    /**
+     * "casa" / "caza": without *seseo* only the vowels match (*asonante*); with
+     * `seseo = true` "s" and "z" sound the same and it becomes a full rhyme (*consonante*).
      */
     @Test fun rimaInternaConSeseo() {
-        assertTrue(rimasInternas("la casa junto a la caza").isEmpty())
+        assertEquals(listOf(Rima.Tipo.ASONANTE), rimasInternas("la casa junto a la caza").map { it.rima })
         val r = Recursos.detectar(listOf("la casa junto a la caza"), seseo = true)
         assertEquals(listOf(RIMA_INTERNA), r.map { it.tipo })
+        assertEquals(Rima.Tipo.CONSONANTE, r[0].rima)
+    }
+
+    /**
+     * Vowel rhymes are common by chance, so their rules are stricter. `.isEmpty()` is true
+     * when the list has no elements.
+     */
+    @Test fun rimaInternaAsonanteSoloCercaYConPalabrasLlanas() {
+        // Too far: "casa" (line 1) and "ventana" (end of line 3) are two lines apart.
+        assertTrue(rimasInternas(
+            "la casa tiene un jardín,",
+            "y el perro duerme tranquilo,",
+            "junto a la vieja ventana").isEmpty())
+        // Words stressed on the last syllable have a one-vowel key ("volverán" / "colgar"):
+        // they would match far too many words, so they do not count.
+        assertTrue(rimasInternas(
+            "Volverán las oscuras golondrinas",
+            "en tu balcón sus nidos a colgar").isEmpty())
     }
 
     /**
      * Cases that must NOT count as *rima interna*.
      */
-    @Test fun rimaInternaNoCuentaRepeticionesNiAsonancias() {
-        // The same word repeated is not a rhyme.
+    @Test fun rimaInternaNoCuentaRepeticionesNiMonosilabos() {
+        // The same word repeated is not a rhyme, and neither is a word with its plural.
         assertTrue(rimasInternas("verde que te quiero verde").isEmpty())
-        // Only *asonante* (vowels match, consonants don't): casa / plaza.
-        assertTrue(rimasInternas("la casa blanca de la plaza").isEmpty())
+        assertTrue(rimasInternas("Verde que te quiero verde.", "Verde viento. Verdes ramas.").isEmpty())
         // No rhyming words at all.
         assertTrue(rimasInternas("el perro y el gato en la noche").isEmpty())
+        // Two short inner words ("es" / "tres") rhyme by chance: they do not count.
+        assertTrue(rimasInternas("el sol es de fuego", "y los tres van lejos").isEmpty())
         // Different stanzas (an empty line between them): "corazón" / "canción" do not count.
         assertTrue(rimasInternas(
             "tu corazón late despacio", "", "y suena la canción").isEmpty())

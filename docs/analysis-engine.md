@@ -344,16 +344,35 @@ Fully identical lines don't count as anaphora or epiphora (that is a refrain).
 
 ### Internal rhyme
 
-A word **inside** a line (not the last one) that makes a **full (consonant) rhyme** with:
-- another inner word of the same line (*la **luna** sobre la **laguna** se dormía*),
-- the last word of the same line (*tu **corazón** es mi **canción***), or
-- the last word of the previous or next line in the stanza (*Un **soneto** me manda
-  hacer Violante, / que en mi vida me he visto en tanto **aprieto***).
+A word **inside** a line (not the last one) that rhymes with another word. All the words of
+a stanza that share a rhyme form **one** device, with the words as evidence
+(`«soneto» · «aprieto»`) and highlighted; `Recurso.rima` says which kind it is.
 
-It uses the same consonant key as end rhyme (so *seseo* applies: *casa / caza*). Only
-full rhymes count, because assonance happens by chance in almost any line. Unstressed
-function words, the same word repeated and one-letter endings are ignored. Each pair is
-reported once, with both words as evidence (`«soneto» · «aprieto»`) and highlighted.
+**Full rhymes** (`CONSONANTE`), using the same consonant key as end rhyme (so *seseo*
+applies: *casa / caza*):
+- an inner word with another inner word of the same line (*la **luna** sobre la **laguna**
+  se dormía*);
+- an inner word with the last word of **any line of the stanza** (*tu **corazón** es mi
+  **canción***; *Un **soneto** me manda hacer Violante, / que en mi vida me he visto en
+  tanto **aprieto***);
+- an inner word with an inner word of the next line (*la noche **oscura** se cierra / con
+  **amargura** en el alma*).
+
+Two inner words only count if both have two syllables or more: short words (*es / tres*)
+rhyme by chance all the time. A short inner word can still rhyme with a line ending.
+
+**Assonant rhymes** (`ASONANTE`, shown as *Rima interna · asonante*). Vowel rhymes appear by
+chance far more often, so the rules are stricter:
+- only an inner word with the last word of **its own line or of the line before or after**
+  (*la **casa blanca** de la **plaza***);
+- only words stressed before the last syllable (a two-vowel key, *a-a*); words stressed on
+  the last syllable have a one-vowel key (*volverán / colgar*) that matches too many words.
+
+Always ignored: unstressed function words, one-letter full-rhyme endings, and the same word
+repeated, also in its plural or a longer form (*verde / verdes*).
+
+Even so, some assonant internal rhymes will be coincidences; that is why they are labelled
+and coloured more softly.
 
 ### Structure detectors
 
@@ -421,7 +440,7 @@ The evidence shows how the sound is spelled: `sonido «b/v» ×4`, `sonido «z/c
 ### What it doesn't detect
 
 **Semantic** devices (metaphor, simile, personification, hyperbole, antithesis…) can't be
-reliably recognised with rules; that would need a language model. Assonant internal rhymes,
+reliably recognised with rules; that would need a language model. Near rhymes,
 hyperbaton and onomatopoeia aren't detected either.
 
 ---
@@ -480,12 +499,12 @@ is on, as `TramoRima(rango, grupo, tipo)` (range, colour group, rhyme type):
 - the **rhyming ending** (from the stressed vowel to the end of the word) of every line that
   rhymes with another, with the group of its letter (A = 0, B = 1…) and its type
   (`CONSONANTE` or `ASONANTE`). Unrhymed lines (`-`) are not coloured;
-- both words of every **internal rhyme**, as full rhymes: with the group of the line whose
-  end rhyme they share (*soneto* takes the colour of *aprieto*'s group) or, if there is
-  none, a new group after the letters' groups.
+- the words of every **internal rhyme**, with their own type (assonant ones softer): with the
+  group of the line whose end rhyme they share (*soneto* takes the colour of *aprieto*'s
+  group) or, if there is none, a new group after the letters' groups.
 
 Example (Lope's quatrain): *son**eto*** (internal, B), *Viol**ante*** (A),
-*apri**eto*** (B), *son**eto*** (B), *del**ante*** (A).
+*apri**eto*** (B), *v**ersos*** (internal assonant, B), *son**eto*** (B), *del**ante*** (A).
 
 ---
 
@@ -498,7 +517,7 @@ Example (Lope's quatrain): *son**eto*** (internal, B), *Viol**ante*** (A),
 | `SilabeadorTest` | 9 | Basic syllabification, digraphs, silent u and diaeresis, diphthongs and triphthongs, hiatus, y, consonant clusters, stress type, word extraction |
 | `MetricaTest` | 8 | *Sinalefa* (with h), final-stress rule, *dialefa* on a stressed vowel, alexandrine, final y, metre not admitted, dominant metre of a sonnet |
 | `RimaTest` | 8 | Endings, full rhymes, assonant rhymes, non-rhymes, *seseo*, sonnet and *romance* schemes, assonant/consonant merging |
-| `RecursosTest` | 19 | Each device type, alliteration in one and two lines, merging, intensity, internal rhymes, and no false positives in well-known lines |
+| `RecursosTest` | 24 | Each device type, alliteration in one and two lines, merging, intensity, internal rhymes (full and assonant), and no false positives in well-known lines |
 | `AnalisisPoemaTest` | 13 | Metre and scheme of a quatrain, *arte menor*, a line that doesn't fit, offsets, empty text, highlight ranges, rhyme colouring spans |
 
 To add a case, use real lines of verse (by well-known authors when possible) and add a

@@ -38,7 +38,8 @@ is in [analysis-engine.md](analysis-engine.md); the note's lifecycle, in
 - **Letter**: rhyme group, in the primary colour. A faint `·` if the line rhymes with no
   other. Lowercase for *arte menor* (short lines).
 - **Panel**: summary *metre · scheme · devices*. Tapping it expands the seseo setting and
-  the list of devices (type, *clara/posible* for alliterations, lines and evidence). Tapping
+  the list of devices (type, *clara/posible* for alliterations, *asonante* for assonant internal
+  rhymes, lines and evidence). Tapping
   a device highlights it and scrolls to its first line; tapping it again clears it.
 - **ⓘ button** on each device row: opens a dialog with what the device is, a classic
   example (Darío, Machado, Bécquer, Lope, Lorca, Hernández…), where it was found in the

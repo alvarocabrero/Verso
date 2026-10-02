@@ -85,7 +85,7 @@ object Recursos {
         ASINDETON("Asíndeton", "Enumeración sin conjunciones"),
         PARALELISMO("Paralelismo", "Versos consecutivos con la misma estructura"),
         ESTRIBILLO("Estribillo", "Verso que se repite a lo largo del texto"),
-        RIMA_INTERNA("Rima interna", "Una palabra dentro del verso rima con otra del mismo verso o con el final de un verso vecino")
+        RIMA_INTERNA("Rima interna", "Una palabra dentro del verso rima con otra del mismo verso o con el final de un verso de la estrofa")
     }
 
     /**
@@ -101,6 +101,8 @@ object Recursos {
      *   frequency in Spanish (e.g. 4.7 means "4.7 times more than usual"). `Double` is a number
      *   with decimals; `Double?` means it may also be null ("nothing"), and `= null` makes null
      *   the default.
+     * - [rima]: only for *rima interna*; whether it is a full rhyme (*consonante*) or a vowel
+     *   rhyme (*asonante*).
      * - [clara] ("clear"): tells a "clear" alliteration from a "possible" one.
      *
      * KOTLIN SYNTAX:
@@ -114,7 +116,8 @@ object Recursos {
         val lineas: List<Int>,
         val evidencia: String,
         val palabras: List<String> = emptyList(),
-        val intensidad: Double? = null
+        val intensidad: Double? = null,
+        val rima: Rima.Tipo? = null
     ) {
         // Clear if it has no intensity (every device other than alliteration) or if the
         // intensity reaches the "clear" threshold. `||` = "or".
@@ -443,51 +446,80 @@ object Recursos {
     // ---------- Internal rhyme ----------
 
     /**
-     * Full rhymes (*rima consonante*) that involve a word INSIDE a line (not its last word):
-     * - with another inner word of the same line ("la luna en la laguna"),
-     * - with the last word of the same line ("mi corazón es tu canción"),
-     * - with the last word of the line before or after (in the same stanza).
-     * Only full rhyme counts: vowel rhyme (*asonante*) shows up by chance in almost every line.
-     * Filler words, the same word repeated, and endings of a single letter are ignored.
+     * Rhymes that involve a word INSIDE a line (not its last word).
      *
-     * Each pair is reported once, with both words as evidence («soneto» · «aprieto») and both
-     * highlighted.
+     * Full rhymes (*rima consonante*: every sound matches from the stressed vowel on):
+     * - an inner word with another inner word of the same line ("la luna en la laguna"),
+     * - an inner word with the last word of ANY line of the stanza ("mi corazón es tu canción"),
+     * - an inner word with an inner word of the next line.
+     * Two inner words only count if both have two syllables or more: short words like "es" /
+     * "tres" rhyme by chance all the time. (A short inner word can still rhyme with a line ending.)
+     *
+     * Vowel rhymes (*rima asonante*: only the vowels match, "plata" / "ramas"). They show up by
+     * chance far more often, so the rules are stricter:
+     * - only an inner word with the last word of its own line, or of the line before or after;
+     * - only words stressed before the last syllable (their key has two vowels, "a-a"); a key of
+     *   a single vowel ("mar", "amor") matches too many words.
+     *
+     * In both cases filler words are ignored, and so is the same word repeated (also in the
+     * plural or a longer form: "verde" / "verdes"), and so are full-rhyme
+     * endings of a single letter.
+     *
+     * All the words of a stanza that share a rhyme form ONE device, with the words as evidence
+     * («soneto» · «aprieto») and highlighted; [Recurso.rima] says which kind of rhyme it is.
      *
      * Receives: [b], the stanza (line positions); [lineas], all the lines; [seseo].
      */
     private fun rimasInternas(b: List<Int>, lineas: List<String>, seseo: Boolean): List<Recurso> {
-        // A tiny helper class used only here: a word and its full-rhyme key (or null if the
-        // word should be ignored).
-        class Pal(val texto: String, val clave: String?)
+        // A tiny helper class used only here: a word, where it is ([linea] = line position in
+        // the text, [indice] = place inside its line, [final] = true for the last word of its
+        // line), [larga] = true if it has two syllables or more, and its two rhyme keys
+        // (null = "this word does not count for that rhyme").
+        class Pal(
+            val texto: String, val linea: Int, val indice: Int, val final: Boolean, val larga: Boolean,
+            val consonante: String?, val asonante: String?
+        )
 
         // A LOCAL FUNCTION (a function defined inside another function, only usable here).
-        // It turns line `li` into its list of `Pal`. The key is:
-        // - null for filler words;
-        // - otherwise the full-rhyme key from Rima.kt, but only if it is 2 letters or longer.
+        // It turns line `li` into its list of `Pal`.
+        // - Filler words get no keys at all.
+        // - The full-rhyme key only counts if it has 2 letters or more.
+        // - The vowel-rhyme key only counts if it has 2 vowels.
         //   `takeIf { ... }` keeps the value if the condition is true, and gives null if not.
-        //   The `?.` chain stops at the first null.
-        fun palabras(li: Int) = Silabeador.palabrasDe(lineas[li]).map { p ->
-            val clave = if (p.lowercase() in ATONOS) null
-                        else Rima.terminacion(p, seseo)?.consonante?.takeIf { it.length >= 2 }
-            Pal(p, clave)
+        fun palabras(li: Int): List<Pal> {
+            val ps = Silabeador.palabrasDe(lineas[li])
+            // `mapIndexed` is `map` that also gives the position `i` of each item.
+            return ps.mapIndexed { i, p ->
+                val t = if (p.lowercase() in ATONOS) null else Rima.terminacion(p, seseo)
+                Pal(
+                    p, li, i, final = i == ps.lastIndex, larga = Silabeador.silabear(p).size >= 2,
+                    consonante = t?.consonante?.takeIf { it.length >= 2 },
+                    asonante = t?.asonante?.takeIf { it.length == 2 }
+                )
+            }
         }
 
         // A map from each line position of the stanza to its words (computed once).
         // `associateWith { ... }` builds a map: each item → the lambda's result for it.
         val porLinea = b.associateWith { palabras(it) }
-        val res = mutableListOf<Recurso>()
-        // Pairs already reported, so none is reported twice. Each pair is stored as a SET of
-        // two texts "line:word", so (A, B) and (B, A) count as the same pair.
-        val vistos = mutableSetOf<Set<String>>()
 
-        // Local function: records one rhyme between word `a` and word `c`, in the lines given.
-        fun anadir(lineasRecurso: List<Int>, a: Pal, c: Pal) {
-            // The same word twice ("luna ... luna") is repetition, not rhyme.
-            if (a.texto.lowercase() == c.texto.lowercase()) return
-            val par = setOf("${lineasRecurso.first()}:${a.texto.lowercase()}", "${lineasRecurso.last()}:${c.texto.lowercase()}")
-            // `add` returns false if the pair was already in the set: then skip it.
-            if (!vistos.add(par)) return
-            res += Recurso(Tipo.RIMA_INTERNA, lineasRecurso, "«${a.texto}» · «${c.texto}»", listOf(a.texto, c.texto))
+        // The rhymes found, grouped by sound. The map key is the kind of rhyme plus the rhyme
+        // key (a `Pair`, written `a to b`); the value is the list of words that share it.
+        val grupos = linkedMapOf<Pair<Rima.Tipo, String>, MutableList<Pal>>()
+
+        // Local function: records that `a` and `c` rhyme with the given kind and key.
+        fun anadir(tipo: Rima.Tipo, clave: String, a: Pal, c: Pal) {
+            // The same word twice ("luna ... luna") is repetition, not rhyme. The same goes for
+            // a word and its plural or a longer form of it ("verde" / "verdes"): one of the two
+            // texts is the beginning of the other. `startsWith` checks exactly that.
+            val x = a.texto.lowercase()
+            val y = c.texto.lowercase()
+            if (x.startsWith(y) || y.startsWith(x)) return
+            // `getOrPut` reads the list for that key, creating an empty one the first time.
+            val g = grupos.getOrPut(tipo to clave) { mutableListOf() }
+            // Add each word only once (a word can rhyme with several others).
+            if (a !in g) g += a
+            if (c !in g) g += c
         }
 
         // Go through each line of the stanza: `k` = its place inside the stanza, `li` = its
@@ -495,36 +527,63 @@ object Recursos {
         b.forEachIndexed { k, li ->
             // `getValue` reads the map and is sure the key exists.
             val ps = porLinea.getValue(li)
-            // A line with fewer than 2 words has no "inside".
-            if (ps.size < 2) return@forEachIndexed
-            // Inner words = all but the last (`dropLast(1)`), and only those with a key.
-            val interiores = ps.dropLast(1).filter { it.clave != null }
-            // The last word of the line.
-            val final = ps.last()
+            // Inner words = all but the last (`dropLast(1)`).
+            val interiores = ps.dropLast(1)
 
-            // Inside the same line: inner with inner, inner with final.
+            // ----- Full rhymes -----
             interiores.forEachIndexed { i, a ->
-                // Compare `a` with every inner word AFTER it (`drop(i + 1)`), so each pair is
-                // checked only once.
-                interiores.drop(i + 1).filter { it.clave == a.clave }.forEach { c -> anadir(listOf(li), a, c) }
-                // Compare `a` with the last word of the line.
-                if (final.clave != null && final.clave == a.clave) anadir(listOf(li), a, final)
+                // `?: return@forEachIndexed` = "if this word has no full-rhyme key, skip it".
+                val clave = a.consonante ?: return@forEachIndexed
+                // With every inner word AFTER it in the same line (`drop(i + 1)`), so each pair
+                // is checked only once.
+                interiores.drop(i + 1).filter { it.consonante == clave && it.larga && a.larga }
+                    .forEach { c -> anadir(Rima.Tipo.CONSONANTE, clave, a, c) }
+                // With the last word of every line of the stanza (its own line included).
+                b.forEach { otra ->
+                    val f = porLinea.getValue(otra).lastOrNull()
+                    if (f != null && f.consonante == clave) anadir(Rima.Tipo.CONSONANTE, clave, a, f)
+                }
+                // With the inner words of the next line (`getOrNull` gives null after the last
+                // line, and then `?.let { ... }` does nothing).
+                b.getOrNull(k + 1)?.let { sig ->
+                    porLinea.getValue(sig).dropLast(1).filter { it.consonante == clave && it.larga && a.larga }
+                        .forEach { c -> anadir(Rima.Tipo.CONSONANTE, clave, a, c) }
+                }
             }
-            // With the last word of the neighbouring lines in the same stanza.
-            // `listOfNotNull(x, y)` makes a list with x and y, leaving out any that is null
-            // (the first line has no previous one, the last has no next one).
-            listOfNotNull(b.getOrNull(k - 1), b.getOrNull(k + 1)).forEach { otro ->
-                // Last word of the other line (or skip if it has none).
-                val finalOtro = porLinea.getValue(otro).lastOrNull() ?: return@forEach
-                if (finalOtro.clave == null) return@forEach
-                // Every inner word of this line that rhymes with it. The two line numbers are
-                // sorted so the device always lists the earlier line first.
-                interiores.filter { it.clave == finalOtro.clave }.forEach { a ->
-                    anadir(listOf(li, otro).sorted(), a, finalOtro)
+
+            // ----- Vowel rhymes -----
+            // The last words to compare with: this line's, the previous line's and the next one's.
+            // `listOfNotNull` leaves out the nulls (the first line has no previous one...).
+            val finales = listOfNotNull(b.getOrNull(k - 1), li, b.getOrNull(k + 1))
+                .mapNotNull { porLinea.getValue(it).lastOrNull() }
+            interiores.forEach { a ->
+                val clave = a.asonante ?: return@forEach
+                finales.forEach { f ->
+                    // Same vowels, but NOT a full rhyme (that one was already recorded above).
+                    if (f.asonante == clave && f.consonante != a.consonante) {
+                        anadir(Rima.Tipo.ASONANTE, clave, a, f)
+                    }
                 }
             }
         }
-        return res
+
+        // One device per group. `map` over a map gives each entry as (key, value); the key is
+        // itself a pair (kind, rhyme key), unpacked with a second pair of parentheses.
+        return grupos.map { (grupo, pals) ->
+            val (tipo, _) = grupo
+            // Words in reading order: by line, then by place in the line.
+            val orden = pals.sortedWith(compareBy({ it.linea }, { it.indice }))
+            // Each different word once (`distinctBy` drops repeats, comparing in lower case).
+            val textos = orden.map { it.texto }.distinctBy { it.lowercase() }
+            Recurso(
+                Tipo.RIMA_INTERNA,
+                lineas = orden.map { it.linea }.distinct(),
+                // `joinToString` glues the items with the separator: «soneto» · «aprieto».
+                evidencia = textos.joinToString(" · ") { "«$it»" },
+                palabras = textos,
+                rima = tipo
+            )
+        }
     }
 
     // ---------- Structure ----------

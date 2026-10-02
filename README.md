@@ -116,7 +116,7 @@ app/src/main/java/com/tuapp/
   ui/editor/           Editor with autosave and real-time analysis
   ui/theme/            "Ink on paper" theme, verse text styles and note palette
   analisis/            Analysis engine in pure Kotlin (no Android dependencies)
-app/src/test/java/com/tuapp/analisis/   JUnit tests for the engine (57)
+app/src/test/java/com/tuapp/analisis/   JUnit tests for the engine (62)
 app/src/test/java/com/tuapp/audio/      JUnit tests for the audio helpers (5)
 docs/                  Technical documentation (docs/es/: Spanish copy)
 ```
@@ -139,7 +139,8 @@ A Spanish copy of every document is in [docs/es/](docs/es/).
   word), nor the caesura of alexandrines.
 - There is one dominant metre per poem: in polymetric poems, lines of a different length
   are shown in red.
-- Internal rhymes are detected only when they are full (consonant) rhymes; there are no near rhymes.
+- Assonant internal rhymes are only looked for near a line ending, and some will be
+  coincidences; there are no near rhymes.
 - Semantic devices (metaphor, simile, personification…) are not detected; that would
   need a language model.
 

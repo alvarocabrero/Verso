@@ -296,12 +296,12 @@ object AnalisisPoema {
      * - the ending of each line that rhymes with another, with the group of its letter
      *   (A = 0, B = 1…) and its type (*consonante* or *asonante*). Lines that rhyme with nothing
      *   (letter '-') are not coloured;
-     * - both words of each internal rhyme (*rima interna*): with the group of the line whose
-     *   final rhyme they share or, if there is none, with a new group after the letter groups.
-     *   They are always coloured as *consonante*.
+     * - the words of each internal rhyme (*rima interna*), with its own type: with the group of
+     *   the line whose final rhyme they share or, if there is none, with a new group after the
+     *   letter groups.
      *
      * Example (a Lope de Vega quatrain): "son[eto]" (internal, B), "Viol[ante]" (A),
-     * "apri[eto]" (B), "son[eto]" (B), "del[ante]" (A).
+     * "apri[eto]" (B), "v[ersos]" (internal *asonante*, B), "son[eto]" (B), "del[ante]" (A).
      *
      * Receives: [r], the analysis result. Returns: the pieces, sorted by position in the text.
      */
@@ -310,6 +310,8 @@ object AnalisisPoema {
         // A map from a full-rhyme key ("eto") to its colour group, so internal rhymes can reuse
         // the colour of the line ending they match.
         val grupoPorClave = mutableMapOf<String, Int>()
+        // The same, from a vowel-rhyme key ("eo") to its colour group.
+        val grupoPorAsonante = mutableMapOf<String, Int>()
 
         // PART 1: line endings.
         r.lineas.forEachIndexed { i, l ->
@@ -327,31 +329,40 @@ object AnalisisPoema {
             out += TramoRima(rango, grupo, tipo)
             // Remember this key's group, unless one is already remembered for it.
             grupoPorClave.putIfAbsent(rima.terminacion.consonante, grupo)
+            // The same for its vowel-rhyme key (used by vowel internal rhymes).
+            grupoPorAsonante.putIfAbsent(rima.terminacion.asonante, grupo)
         }
 
         // PART 2: internal rhymes.
         // The first free group number: one more than the largest used (or 0 if none).
         // `maxOfOrNull { ... }` gives the largest value, or null for an empty list.
         var siguiente = (out.maxOfOrNull { it.grupo } ?: -1) + 1
-        r.recursos.filter { it.tipo == Recursos.Tipo.RIMA_INTERNA }.forEach { recurso ->
-            // The two words of the rhyme, each as a pair (text, range). `substring(range)` cuts
-            // the text at that range; `a to b` makes a pair.
-            val palabras = rangos(r, recurso).map { r.texto.substring(it) to it }
-            // Their shared full-rhyme key: the first non-null key among the words.
-            // `{ (p, _) -> ... }` takes each pair apart; `_` = "this part is not needed".
-            val clave = palabras.firstNotNullOfOrNull { (p, _) -> Rima.terminacion(p, r.seseo)?.consonante }
-                ?: return@forEach
-            // The group of a line ending with the same key, or else a new group.
-            // `getOrPut(key) { ... }` reads the map, and if the key is missing, stores and
-            // returns the lambda's value. `siguiente++` gives the current value and THEN adds 1.
-            val grupo = grupoPorClave.getOrPut(clave) { siguiente++ }
-            palabras.forEach { (p, rango) ->
-                val t = terminacionEn(p, rango, r.seseo) ?: return@forEach
-                // Add it unless that exact piece is already coloured (e.g. it is also a line
-                // ending). `none { ... }` = "no item meets this".
-                if (out.none { it.rango == t }) out += TramoRima(t, grupo, Rima.Tipo.CONSONANTE)
+        r.recursos.filter { it.tipo == Recursos.Tipo.RIMA_INTERNA }
+            // Full rhymes first: if a word is in both kinds, it keeps the stronger colour.
+            // (`ordinal` is the position of the value in its enum: CONSONANTE = 0, ASONANTE = 1.)
+            .sortedBy { (it.rima ?: Rima.Tipo.CONSONANTE).ordinal }
+            .forEach { recurso ->
+                val tipo = recurso.rima ?: Rima.Tipo.CONSONANTE
+                // The words of the rhyme, each as a pair (text, range). `substring(range)` cuts
+                // the text at that range; `a to b` makes a pair.
+                val palabras = rangos(r, recurso).map { r.texto.substring(it) to it }
+                // Their shared rhyme key (full or vowel, by kind): the first non-null key among
+                // the words. `{ (p, _) -> ... }` takes each pair apart; `_` = "not needed".
+                val clave = palabras.firstNotNullOfOrNull { (p, _) ->
+                    Rima.terminacion(p, r.seseo)?.let { if (tipo == Rima.Tipo.CONSONANTE) it.consonante else it.asonante }
+                } ?: return@forEach
+                // The group of a line ending with the same key, or else a new group.
+                // `getOrPut(key) { ... }` reads the map, and if the key is missing, stores and
+                // returns the lambda's value. `siguiente++` gives the current value, THEN adds 1.
+                val grupos = if (tipo == Rima.Tipo.CONSONANTE) grupoPorClave else grupoPorAsonante
+                val grupo = grupos.getOrPut(clave) { siguiente++ }
+                palabras.forEach { (p, rango) ->
+                    val t = terminacionEn(p, rango, r.seseo) ?: return@forEach
+                    // Add it unless that exact piece is already coloured (e.g. it is also a line
+                    // ending). `none { ... }` = "no item meets this".
+                    if (out.none { it.rango == t }) out += TramoRima(t, grupo, tipo)
+                }
             }
-        }
         // Sort by where each piece starts in the text.
         return out.sortedBy { it.rango.first }
     }

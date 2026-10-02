@@ -18,8 +18,8 @@ text analysis: metrical syllables per line, rhymes and literary devices.
 
 ## Status
 
-- Builds with no warnings (`gradlew assembleDebug` / `assembleRelease`) and the 62 JVM
-  tests pass (57 engine + 5 audio helpers;
+- Builds with no warnings (`gradlew assembleDebug` / `assembleRelease`) and the 67 JVM
+  tests pass (62 engine + 5 audio helpers;
   `gradlew testDebugUnitTest`). Tested on an emulator, not yet on a
   real phone.
 - Releases on GitHub: v0.2.0 (current, signed APK, ~1.4 MB) and v0.1.0.
@@ -100,14 +100,17 @@ intensidad)`. Detects alliteration, anaphora, epiphora, anadiplosis, epanadiplos
 geminatio, polysyndeton, asyndeton, parallelism, refrain and internal rhyme. Alliteration counts only
 syllable-onset consonants against their normal frequency in Spanish (threshold 3.5;
 `clara` from 4.5), analyses each line and each pair of consecutive lines, and merges
-overlaps.
+overlaps. Internal rhyme (`Recurso.rima`): full rhymes between inner words (same or next line, both
+polysyllabic) or with any line ending of the stanza; assonant ones only with the ending of the
+own/previous/next line and only two-vowel keys; one device per rhyme per stanza; a word and its
+plural or longer form count as repetition.
 
 **AnalisisPoema**: `analizar(texto, seseo)` combines dominant metre, syllables per line
 (the metre if the line admits it; otherwise the closest value in its range and
 `encaja = false`), rhyme and devices, with each line's offsets in the text.
 `rangos(resultado, recurso)` gives the characters to highlight.
 
-**Known limitations**: no diéresis/sinéresis or alexandrine hemistichs; no assonant internal rhymes or
+**Known limitations**: no diéresis/sinéresis or alexandrine hemistichs; no
 near rhymes; no semantic devices (metaphor, simile…), which would need a language model;
 one metre per poem.
 

@@ -111,7 +111,7 @@ app/src/main/java/com/tuapp/
   ui/editor/           Editor con autoguardado y análisis en tiempo real
   ui/theme/            Tema "tinta sobre papel", estilos de verso y paleta de notas
   analisis/            Motor de análisis en Kotlin puro (sin Android)
-app/src/test/java/com/tuapp/analisis/   Tests JUnit del motor (57)
+app/src/test/java/com/tuapp/analisis/   Tests JUnit del motor (62)
 app/src/test/java/com/tuapp/audio/      Tests JUnit de las utilidades de audio (5)
 docs/                  Documentación técnica en inglés (docs/es/: en español)
 ```
@@ -133,7 +133,8 @@ La versión en inglés de cada documento está en [docs/](docs/).
 - No detecta diéresis ni sinéresis, ni la cesura de los alejandrinos.
 - Un solo metro dominante por poema: en poemas polimétricos, los versos de otra medida
   aparecen en rojo.
-- Las rimas internas solo se detectan si son consonantes; no hay "casi rimas".
+- Las rimas internas asonantes solo se buscan cerca de un final de verso, y algunas serán
+  casuales; no hay "casi rimas".
 - Los recursos semánticos (metáfora, símil, personificación…) no se detectan: haría falta
   un modelo de lenguaje.
 

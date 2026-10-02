@@ -794,8 +794,15 @@ private fun DeviceRow(d: Recursos.Recurso, numbers: List<Int?>, selected: Boolea
         // Otherwise: "versos 1, 5, 9". `joinToString(", ")` joins the numbers with commas.
         else -> "versos " + verses.joinToString(", ")
     }
-    // For alliterations only, add " · clara" (clear) or " · posible" (possible); else nothing.
-    val degree = if (d.tipo == Recursos.Tipo.ALITERACION) (if (d.clara) " · clara" else " · posible") else ""
+    // A short extra label after the name of some devices; for the others, nothing.
+    //   - alliterations: " · clara" (clear) or " · posible" (possible);
+    //   - internal rhymes: " · asonante" when only the vowels match (a full rhyme gets none).
+    // `when { ... }` picks the first branch whose condition is true.
+    val degree = when {
+        d.tipo == Recursos.Tipo.ALITERACION -> if (d.clara) " · clara" else " · posible"
+        d.rima == Rima.Tipo.ASONANTE -> " · asonante"
+        else -> ""
+    }
     Row(
         verticalAlignment = Alignment.CenterVertically,
         modifier = Modifier

@@ -305,17 +305,36 @@ Versos completamente iguales no cuentan como anáfora ni epífora (eso es estrib
 
 ### Rima interna
 
-Una palabra del **interior** de un verso (no la última) que rima en **consonante** con:
-- otra palabra interior del mismo verso (*la **luna** sobre la **laguna** se dormía*),
-- la última palabra del mismo verso (*tu **corazón** es mi **canción***), o
-- la última palabra del verso anterior o siguiente de la estrofa (*Un **soneto** me manda
-  hacer Violante, / que en mi vida me he visto en tanto **aprieto***).
+Una palabra del **interior** de un verso (no la última) que rima con otra. Todas las
+palabras de una estrofa que comparten una rima forman **un solo** recurso, con las palabras
+como evidencia (`«soneto» · «aprieto»`) y resaltadas; `Recurso.rima` indica de qué tipo es.
 
-Usa la misma clave consonante que la rima final (así que el seseo cuenta: *casa / caza*).
-Solo cuenta la rima consonante, porque la asonancia aparece por azar en casi cualquier
-verso. Se ignoran las palabras átonas, la misma palabra repetida y las terminaciones de una
-sola letra. Cada pareja se señala una vez, con las dos palabras como evidencia
-(`«soneto» · «aprieto»`) y resaltadas.
+**Rimas consonantes** (`CONSONANTE`), con la misma clave consonante que la rima final (así
+que el seseo cuenta: *casa / caza*):
+- una palabra interior con otra palabra interior del mismo verso (*la **luna** sobre la
+  **laguna** se dormía*);
+- una palabra interior con la última palabra de **cualquier verso de la estrofa** (*tu
+  **corazón** es mi **canción***; *Un **soneto** me manda hacer Violante, / que en mi vida
+  me he visto en tanto **aprieto***);
+- una palabra interior con una palabra interior del verso siguiente (*la noche **oscura** se
+  cierra / con **amargura** en el alma*).
+
+Dos palabras interiores solo cuentan si las dos tienen dos sílabas o más: las palabras
+cortas (*es / tres*) riman por casualidad a todas horas. Una palabra corta interior sí puede
+rimar con un final de verso.
+
+**Rimas asonantes** (`ASONANTE`, se muestran como *Rima interna · asonante*). La asonancia
+aparece por azar mucho más a menudo, así que las reglas son más estrictas:
+- solo una palabra interior con la última palabra de **su propio verso, del anterior o del
+  siguiente** (*la **casa blanca** de la **plaza***);
+- solo palabras llanas o esdrújulas (clave de dos vocales, *a-a*); las agudas tienen una
+  clave de una sola vocal (*volverán / colgar*) que coincide con demasiadas palabras.
+
+Siempre se ignoran: las palabras átonas, las terminaciones consonantes de una sola letra y
+la misma palabra repetida, también en plural o en una forma más larga (*verde / verdes*).
+
+Aun así, algunas rimas internas asonantes serán casuales; por eso llevan su etiqueta y se
+colorean más suave.
 
 ### Detectores de estructura
 
@@ -386,7 +405,7 @@ La evidencia muestra la grafía del sonido: `sonido «b/v» ×4`, `sonido «z/c�
 
 Los recursos **semánticos** (metáfora, símil, personificación, hipérbole, antítesis…) no
 se pueden reconocer con reglas de forma fiable; haría falta un modelo de lenguaje. Tampoco
-hay detección de rimas internas asonantes, hipérbaton ni onomatopeyas.
+hay detección de "casi rimas", hipérbaton ni onomatopeyas.
 
 ---
 
@@ -445,12 +464,12 @@ activa el coloreado de rimas, como `TramoRima(rango, grupo, tipo)`:
 - la **terminación que rima** (desde la vocal tónica hasta el final de la palabra) de cada
   verso que rima con otro, con el grupo de su letra (A = 0, B = 1…) y su tipo
   (`CONSONANTE` o `ASONANTE`). Los versos sueltos (`-`) no se colorean;
-- las dos palabras de cada **rima interna**, como rima consonante: con el grupo del verso
-  cuya rima final comparten (*soneto* toma el color del grupo de *aprieto*) o, si no hay
-  ninguno, con un grupo nuevo tras los de las letras.
+- las palabras de cada **rima interna**, con su propio tipo (las asonantes, más suaves): con
+  el grupo del verso cuya rima final comparten (*soneto* toma el color del grupo de
+  *aprieto*) o, si no hay ninguno, con un grupo nuevo tras los de las letras.
 
 Ejemplo (cuarteto de Lope): *son**eto*** (interna, B), *Viol**ante*** (A),
-*apri**eto*** (B), *son**eto*** (B), *del**ante*** (A).
+*apri**eto*** (B), *v**ersos*** (interna asonante, B), *son**eto*** (B), *del**ante*** (A).
 
 ---
 
@@ -463,7 +482,7 @@ Ejemplo (cuarteto de Lope): *son**eto*** (interna, B), *Viol**ante*** (A),
 | `SilabeadorTest` | 9 | Silabeo básico, dígrafos, u muda y diéresis, diptongos y triptongos, hiatos, y griega, grupos consonánticos, tipo acentual, extracción de palabras |
 | `MetricaTest` | 8 | Sinalefa (con h), ley del acento final, dialefa en vocal tónica, alejandrino, y final, metro no admitido, metro dominante de un soneto |
 | `RimaTest` | 8 | Terminaciones, consonantes, asonantes, no rimas, seseo, esquemas de soneto y romance, fusión asonante/consonante |
-| `RecursosTest` | 19 | Cada tipo de recurso, aliteración en uno y dos versos, fusión, intensidad, rimas internas y ausencia de falsos positivos en versos conocidos |
+| `RecursosTest` | 24 | Cada tipo de recurso, aliteración en uno y dos versos, fusión, intensidad, rimas internas (consonantes y asonantes) y ausencia de falsos positivos en versos conocidos |
 | `AnalisisPoemaTest` | 13 | Metro y esquema de un cuarteto, arte menor, verso que no encaja, posiciones, texto vacío, rangos de resaltado, tramos para colorear rimas |
 
 Para añadir un caso: usa versos reales (de autores conocidos cuando sea posible) y anota

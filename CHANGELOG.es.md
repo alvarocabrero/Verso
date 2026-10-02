@@ -2,6 +2,17 @@
 
 [English](CHANGELOG.md) · **Español**
 
+## Sin publicar
+
+En `main`, todavía no está en ninguna versión publicada.
+
+### Cambios
+- **Rimas internas: se detectan más.** Las consonantes se buscan ahora en toda la estrofa (una
+  palabra interior con el final de cualquiera de sus versos, o con una palabra interior del
+  verso siguiente), y también se detectan las **asonantes**, cerca de un final de verso. Llevan
+  la etiqueta *Rima interna · asonante* y un color más suave; algunas serán casuales. Las
+  palabras que comparten una rima se agrupan en una sola entrada.
+
 ## 0.2.0 (2026-10-02)
 
 ### Novedades

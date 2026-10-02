@@ -209,10 +209,13 @@ class AnalisisPoemaTest {
     }
 
     /**
-     * Lope's quatrain: the endings "ante" (group A = 0) and "eto" (group B = 1) are coloured,
-     * all *consonante*. There is also a *rima interna*: "soneto" inside line 1 rhymes with
-     * "aprieto" (group B), so it gets the B colour too. The pieces come in text order.
-     * `val c = ...` is a short name so the list below is easier to read.
+     * Lope's quatrain: the endings "ante" (group A = 0) and "eto" (group B = 1) are coloured
+     * as *consonante*. There are also two internal rhymes, which take the B colour:
+     * - "soneto" inside line 1 is a full rhyme with "aprieto";
+     * - "versos" inside line 3 shares only the vowels e-o with "soneto" and "aprieto", so it
+     *   is coloured as *asonante* (softer).
+     * The pieces come in text order. `val c = ...` is a short name so the list below is
+     * easier to read.
      */
     @Test fun tramosDeUnCuarteto() {
         val c = Rima.Tipo.CONSONANTE
@@ -224,6 +227,8 @@ class AnalisisPoemaTest {
                 Triple("ante", 0, c),
                 // aprieto (B).
                 Triple("eto", 1, c),
+                // «versos», vowel internal rhyme with «soneto» / «aprieto» (group B).
+                Triple("ersos", 1, Rima.Tipo.ASONANTE),
                 // soneto, end of line 3 (B).
                 Triple("eto", 1, c),
                 // delante (A).

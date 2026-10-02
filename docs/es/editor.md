@@ -38,7 +38,7 @@ está en [analysis-engine.md](analysis-engine.md); el ciclo de vida de la nota, 
 - **Letra**: grupo de rima, en el color primario. `·` apagado si el verso no rima con
   ninguno. Minúsculas en arte menor.
 - **Panel**: resumen *metro · esquema · recursos*. Al tocarlo se despliega con el ajuste
-  de seseo y la lista de recursos (tipo, *clara/posible* en aliteraciones, versos y
+  de seseo y la lista de recursos (tipo, *clara/posible* en aliteraciones, *asonante* en rimas internas asonantes, versos y
   evidencia). Tocar un recurso lo resalta y lleva la pantalla a su primer verso; tocarlo
   otra vez lo quita.
 - **Botón ⓘ** en cada recurso: abre un diálogo con qué es el recurso, un ejemplo clásico
