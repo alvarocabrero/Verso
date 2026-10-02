@@ -11,9 +11,16 @@ aliteración, la anáfora o el paralelismo. Además guarda **notas de voz y maqu
 en la app o se adjuntan audios, y se vinculan a las notas a las que pertenecen.
 
 <p align="center">
-  <img src="docs/screenshots/editor-margin.png" width="240" alt="Editor con sílabas y rimas al margen">
-  <img src="docs/screenshots/device-highlighted.png" width="240" alt="Anadiplosis resaltada en el texto">
-  <img src="docs/screenshots/alliteration-possible-dark.png" width="240" alt="Aliteración posible en modo oscuro">
+  <img src="docs/screenshots/home-notes.png" width="200" alt="Sección de notas: tarjetas con colores y contador de audios">
+  <img src="docs/screenshots/rhyme-colours.png" width="200" alt="Editor con sílabas, letras de rima y rimas coloreadas">
+  <img src="docs/screenshots/device-highlighted.png" width="200" alt="Un recurso literario (anadiplosis) resaltado en el texto">
+  <img src="docs/screenshots/audios.png" width="200" alt="Sección de audios: reproduciendo un audio vinculado a una nota">
+</p>
+<p align="center">
+  <img src="docs/screenshots/device-info.png" width="200" alt="Explicación de un recurso literario con un ejemplo clásico">
+  <img src="docs/screenshots/alliteration-possible-dark.png" width="200" alt="Aliteración posible con subrayado punteado, modo oscuro">
+  <img src="docs/screenshots/note-audios.png" width="200" alt="Audios vinculados a una nota, con uno sonando">
+  <img src="docs/screenshots/recording.png" width="200" alt="Grabando un audio">
 </p>
 
 ## Qué hace

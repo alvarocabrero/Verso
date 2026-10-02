@@ -13,9 +13,16 @@ them in the app or attach audio files, and link them to the notes they belong to
 The app's interface and analysis are in Spanish, and it is designed for Spanish verse.
 
 <p align="center">
-  <img src="docs/screenshots/editor-margin.png" width="240" alt="Editor with syllables and rhymes in the margin">
-  <img src="docs/screenshots/device-highlighted.png" width="240" alt="Anadiplosis highlighted in the text">
-  <img src="docs/screenshots/alliteration-possible-dark.png" width="240" alt="Possible alliteration in dark mode">
+  <img src="docs/screenshots/home-notes.png" width="200" alt="Notes section: cards with colours and audio counters">
+  <img src="docs/screenshots/rhyme-colours.png" width="200" alt="Editor with syllables, rhyme letters and coloured rhymes">
+  <img src="docs/screenshots/device-highlighted.png" width="200" alt="A literary device (anadiplosis) highlighted in the text">
+  <img src="docs/screenshots/audios.png" width="200" alt="Audios section: playing an audio linked to a note">
+</p>
+<p align="center">
+  <img src="docs/screenshots/device-info.png" width="200" alt="Explanation of a literary device with a classic example">
+  <img src="docs/screenshots/alliteration-possible-dark.png" width="200" alt="Possible alliteration with a dotted underline, dark mode">
+  <img src="docs/screenshots/note-audios.png" width="200" alt="A note's linked audios, playing one">
+  <img src="docs/screenshots/recording.png" width="200" alt="Recording an audio">
 </p>
 
 ## Features

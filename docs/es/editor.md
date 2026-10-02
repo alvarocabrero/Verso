@@ -7,16 +7,22 @@ está en [analysis-engine.md](analysis-engine.md); el ciclo de vida de la nota, 
 [architecture.md](architecture.md).
 
 <p align="center">
-  <img src="../screenshots/editor-margin.png" width="220" alt="Margen de sílabas y rimas">
-  <img src="../screenshots/alliteration-clear.png" width="220" alt="Aliteración clara subrayada">
-  <img src="../screenshots/alliteration-possible-dark.png" width="220" alt="Aliteración posible punteada, modo oscuro">
+  <img src="../screenshots/editor-margin.png" width="200" alt="Margen de sílabas y rimas, con el chip de audios">
+  <img src="../screenshots/rhyme-colours.png" width="200" alt="Rimas coloreadas y el panel desplegado con su leyenda">
+  <img src="../screenshots/device-highlighted.png" width="200" alt="Un recurso elegido, resaltado con fondo">
+  <img src="../screenshots/device-info.png" width="200" alt="Diálogo de información de un recurso literario">
+</p>
+<p align="center">
+  <img src="../screenshots/alliteration-clear.png" width="200" alt="Aliteración clara, subrayado sólido">
+  <img src="../screenshots/alliteration-possible-dark.png" width="200" alt="Aliteración posible, subrayado punteado, modo oscuro">
+  <img src="../screenshots/note-audios.png" width="200" alt="Panel con los audios de la nota">
 </p>
 
 ## Qué ve quien escribe
 
 ```
- ←                      #   📌  🎨  🗑
- [Poema] [Canción]
+ ←                  #   🖌  📌  🎨  🗑
+ [Poema] [Canción] [🎧 2 audios]
  Soneto de repente
  Un soneto me manda hacer Violante,        11  A
  que en mi vida me he visto en tanto

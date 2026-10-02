@@ -7,16 +7,22 @@ is in [analysis-engine.md](analysis-engine.md); the note's lifecycle, in
 [architecture.md](architecture.md).
 
 <p align="center">
-  <img src="screenshots/editor-margin.png" width="220" alt="Syllable and rhyme margin">
-  <img src="screenshots/alliteration-clear.png" width="220" alt="Clear alliteration, underlined">
-  <img src="screenshots/alliteration-possible-dark.png" width="220" alt="Possible alliteration, dotted, dark mode">
+  <img src="screenshots/editor-margin.png" width="200" alt="Syllable and rhyme margin, with the Audios chip">
+  <img src="screenshots/rhyme-colours.png" width="200" alt="Rhyme colouring and the expanded panel with its legend">
+  <img src="screenshots/device-highlighted.png" width="200" alt="A selected device highlighted with a background">
+  <img src="screenshots/device-info.png" width="200" alt="Info dialog of a literary device">
+</p>
+<p align="center">
+  <img src="screenshots/alliteration-clear.png" width="200" alt="Clear alliteration, solid underline">
+  <img src="screenshots/alliteration-possible-dark.png" width="200" alt="Possible alliteration, dotted underline, dark mode">
+  <img src="screenshots/note-audios.png" width="200" alt="The note's audios sheet">
 </p>
 
 ## What the writer sees
 
 ```
- ←                      #   📌  🎨  🗑
- [Poema] [Canción]
+ ←                  #   🖌  📌  🎨  🗑
+ [Poema] [Canción] [🎧 2 audios]
  Soneto de repente
  Un soneto me manda hacer Violante,        11  A
  que en mi vida me he visto en tanto

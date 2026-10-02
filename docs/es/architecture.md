@@ -168,6 +168,12 @@ Dos detalles evitan notas duplicadas:
 
 ## Audios
 
+<p align="center">
+  <img src="../screenshots/audios.png" width="200" alt="Sección de audios">
+  <img src="../screenshots/recording.png" width="200" alt="Grabando">
+  <img src="../screenshots/note-audios.png" width="200" alt="Audios de una nota">
+</p>
+
 **Grabación** (`AudioRecorder`, manejado por `AudiosViewModel`): AAC en un archivo `.m4a`,
 mono, 44,1 kHz, 128 kbps (alrededor de 1 MB por minuto). El panel de grabación consulta el
 tiempo transcurrido y el nivel de entrada cada 100 ms. Cuando la app pasa a segundo plano

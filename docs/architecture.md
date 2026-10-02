@@ -166,6 +166,12 @@ Two details prevent duplicate notes:
 
 ## Audios
 
+<p align="center">
+  <img src="screenshots/audios.png" width="200" alt="Audios section">
+  <img src="screenshots/recording.png" width="200" alt="Recording">
+  <img src="screenshots/note-audios.png" width="200" alt="A note's audios">
+</p>
+
 **Recording** (`AudioRecorder`, driven by `AudiosViewModel`): AAC in an `.m4a` file, mono,
 44.1 kHz, 128 kbps (about 1 MB per minute). The recording sheet polls the elapsed time and
 the input level every 100 ms. When the app goes to the background (`ON_STOP`) the recording
