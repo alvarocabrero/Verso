@@ -33,6 +33,11 @@ En `main`, todavía no está en ninguna versión publicada.
 - Base de datos en versión 2 (tablas nuevas para los audios). Al actualizar desde la 0.1.0
   se conservan todas las notas.
 
+### Corregido
+- El teclado ya no se abre solo en la pantalla principal al cerrar una nota.
+- En modo oscuro, el panel de análisis de una nota **con color** se lee bien (sus títulos
+  salían en negro).
+
 ### Otros
 - Licencia [GNU GPL v3.0](LICENSE).
 

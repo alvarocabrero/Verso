@@ -27,6 +27,7 @@ package com.tuapp.ui.home
 
 // Layout: `Box` (a container where children are stacked on top of each other), padding and
 // "window insets" (the space taken by system bars, explained below).
+import androidx.compose.foundation.focusable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.foundation.layout.padding
@@ -43,9 +44,16 @@ import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.ui.Modifier
 // Gives access to the Android `Context` from inside a composable.
 import androidx.compose.ui.platform.LocalContext
+// Controls which element has the keyboard focus.
+import androidx.compose.ui.platform.LocalFocusManager
+// The screen's lifecycle (resumed, stopped...) and a way to observe its events.
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
+import androidx.lifecycle.compose.LocalLifecycleOwner
 // Our own classes.
 import com.tuapp.VersoApp
 import com.tuapp.ui.audios.AudiosScreen
@@ -67,6 +75,25 @@ fun HomeScreen(openNote: (Long) -> Unit) {
     // The selected tab: 0 = Notes, 1 = Audios. `homeTab` is Compose state inside
     // Preferences, so when it changes this screen recomposes and shows the other section.
     val tab = preferences.homeTab
+
+    // When this screen comes back to the front (after closing the editor, or when the app
+    // returns from the background), Android would hand the keyboard focus to the first text
+    // field it finds: the search bar. The keyboard would then open by itself and cover the
+    // "+" button. So every time the screen is "resumed" we take the focus away again.
+    //   - `LocalFocusManager.current` controls which element has the focus.
+    //   - `LocalLifecycleOwner.current.lifecycle` is this screen's lifecycle (created, started,
+    //     resumed, stopped...).
+    //   - `DisposableEffect` runs its block when the screen appears and its `onDispose` block
+    //     when it goes away; here it registers an observer and removes it at the end.
+    val focusManager = LocalFocusManager.current
+    val lifecycle = LocalLifecycleOwner.current.lifecycle
+    DisposableEffect(lifecycle) {
+        val observer = LifecycleEventObserver { _, event ->
+            if (event == Lifecycle.Event.ON_RESUME) focusManager.clearFocus(force = true)
+        }
+        lifecycle.addObserver(observer)
+        onDispose { lifecycle.removeObserver(observer) }
+    }
 
     Scaffold(
         // The bottom bar with the two tabs.
@@ -94,7 +121,10 @@ fun HomeScreen(openNote: (Long) -> Unit) {
         // The main content. `padding` is the space the Scaffold keeps for the bottom bar.
         // `consumeWindowInsets(padding)` tells the inner screens "this space is already taken
         // care of", so they do not add it a second time (each section has its own Scaffold).
-        Box(Modifier.padding(padding).consumeWindowInsets(padding)) {
+        // `focusable()` makes this container able to hold the focus. When the editor closes,
+        // Compose gives the focus to the first focusable element of the screen; without this
+        // it would be the search bar, and the keyboard would open by itself.
+        Box(Modifier.padding(padding).consumeWindowInsets(padding).focusable()) {
             // Show the section for the selected tab.
             if (tab == 1) AudiosScreen(openNote = openNote) else NotesScreen(openNote = openNote)
         }

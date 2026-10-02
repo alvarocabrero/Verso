@@ -30,6 +30,10 @@ On `main`, not yet in a published release.
   Spanish names, and the app itself stays in Spanish.
 - Database version 2 (new tables for audios). Upgrading from 0.1.0 keeps all notes.
 
+### Fixed
+- The keyboard no longer opens by itself on the home screen after closing a note.
+- In dark mode, the analysis panel of a **coloured** note is readable (its titles were black).
+
 ### Other
 - Licensed under the [GNU GPL v3.0](LICENSE).
 

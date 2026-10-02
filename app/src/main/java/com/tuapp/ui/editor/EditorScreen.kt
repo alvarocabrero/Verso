@@ -186,6 +186,10 @@ fun EditorScreen(
     Scaffold(
         // Page background: the note's colour (`noteBackground` picks the light or dark version).
         containerColor = noteBackground(vm.color),
+        // Default colour for text and icons on top of that background. Material can only guess
+        // it for its own theme colours; a note colour is not one of them, and without this line
+        // the text of a coloured note would be black, unreadable in dark mode.
+        contentColor = MaterialTheme.colorScheme.onSurface,
         // The top bar. The braces `{ ... }` are a lambda: a piece of UI passed as a parameter.
         topBar = {
             TopAppBar(
