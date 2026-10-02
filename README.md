@@ -68,10 +68,7 @@ The latest signed build is in
 [Releases](https://github.com/alvarocabrero/Verso/releases/latest). Download the `.apk` on
 your phone and allow installing apps from that source when Android asks.
 
-The published release is **0.1.0**. Everything added since (audios, rhyme colouring,
-internal rhyme, the ⓘ explanations) is on `main` and will ship in 0.2.0; until then, build
-it from source (see below). What changed in each version is in the
-[changelog](CHANGELOG.md).
+What changed in each version is in the [changelog](CHANGELOG.md).
 
 ## Requirements
 

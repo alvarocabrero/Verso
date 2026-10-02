@@ -63,10 +63,7 @@ La última versión firmada está en
 [Releases](https://github.com/alvarocabrero/Verso/releases/latest): descarga el `.apk` en
 el móvil y permite instalar apps de ese origen cuando Android lo pida.
 
-La versión publicada es la **0.1.0**. Todo lo añadido después (audios, colorear rimas, rima
-interna, las explicaciones ⓘ) está en `main` y saldrá en la 0.2.0; mientras tanto, se puede
-compilar desde el código (ver abajo). Los cambios de cada versión están en el
-[registro de cambios](CHANGELOG.es.md).
+Los cambios de cada versión están en el [registro de cambios](CHANGELOG.es.md).
 
 ## Requisitos
 

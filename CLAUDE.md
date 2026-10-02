@@ -22,7 +22,7 @@ text analysis: metrical syllables per line, rhymes and literary devices.
   tests pass (57 engine + 5 audio helpers;
   `gradlew testDebugUnitTest`). Tested on an emulator, not yet on a
   real phone.
-- Release v0.1.0 is published on GitHub (signed APK, ~1.2 MB).
+- Releases on GitHub: v0.2.0 (current, signed APK, ~1.4 MB) and v0.1.0.
 - Build environment on this PC: JDK 17 (Temurin, in `C:\Program Files\Eclipse Adoptium`;
   `java` is not on the PATH, set `JAVA_HOME`), Android SDK in `%LOCALAPPDATA%\Android\Sdk`
   (set in `local.properties`), Gradle wrapper 8.9, `gh` logged in as `alvarocabrero`.

@@ -2,9 +2,7 @@
 
 [English](CHANGELOG.md) · **Español**
 
-## Sin publicar (0.2.0)
-
-En `main`, todavía no está en ninguna versión publicada.
+## 0.2.0 (2026-10-02)
 
 ### Novedades
 - **Sección de audios.** La pantalla principal tiene una barra abajo para cambiar entre

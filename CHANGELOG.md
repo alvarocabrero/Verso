@@ -2,9 +2,7 @@
 
 **English** · [Español](CHANGELOG.es.md)
 
-## Unreleased (0.2.0)
-
-On `main`, not yet in a published release.
+## 0.2.0 (2026-10-02)
 
 ### Added
 - **Audios section.** The home screen has a bottom bar to switch between *Notas* and
