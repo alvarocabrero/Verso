@@ -2,9 +2,7 @@
 
 [English](CHANGELOG.md) · **Español**
 
-## Sin publicar
-
-En `main`, todavía no está en ninguna versión publicada.
+## 0.2.1 (2026-10-02)
 
 ### Cambios
 - **Rimas internas: se detectan más.** Las consonantes se buscan ahora en toda la estrofa (una

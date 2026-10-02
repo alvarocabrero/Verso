@@ -2,9 +2,7 @@
 
 **English** · [Español](CHANGELOG.es.md)
 
-## Unreleased
-
-On `main`, not yet in a published release.
+## 0.2.1 (2026-10-02)
 
 ### Changed
 - **Internal rhymes: more are found.** Full rhymes are now searched across the whole stanza
