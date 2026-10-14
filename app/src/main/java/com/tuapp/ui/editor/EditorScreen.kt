@@ -57,7 +57,6 @@ import androidx.compose.material.icons.outlined.Delete
 import androidx.compose.material.icons.outlined.Palette
 import androidx.compose.material.icons.outlined.PushPin
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.FilterChip
 import androidx.compose.material3.AssistChip
 import androidx.compose.material3.AssistChipDefaults
 import androidx.compose.material3.ModalBottomSheet
@@ -97,7 +96,6 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.tuapp.audio.AudioFormat
 import com.tuapp.data.Audio
-import com.tuapp.data.NoteType
 import com.tuapp.ui.audios.AudioRow
 import com.tuapp.ui.audios.LinkDialog
 import com.tuapp.ui.theme.NotePalette
@@ -337,24 +335,13 @@ fun EditorScreen(
             // vertically with the `scroll` state created above. Title and verses are inside ONE
             // scroll, so they move together like a sheet of paper.
             Column(Modifier.weight(1f).verticalScroll(scroll)) {
-                // Row of chips: "Poema" / "Canción", and the "Audios" chip. Chips are small
-                // rounded buttons. `Arrangement.spacedBy(8.dp)` puts 8 dp between them, and the
-                // modifier adds 16 dp of space on the left and right.
+                // Row with the "Audios" chip (a chip is a small rounded button). The modifier
+                // adds 16 dp of space on the left and right. (There used to be "Poema" /
+                // "Canción" chips here too; they were removed in 0.2.2.)
                 Row(
                     horizontalArrangement = Arrangement.spacedBy(8.dp),
                     modifier = Modifier.padding(horizontal = 16.dp)
                 ) {
-                    // `NoteType.entries` is the list of all values of the `NoteType` enum (POEM,
-                    // SONG). `.forEach { t -> ... }` makes one chip for each, naming it `t`.
-                    NoteType.entries.forEach { t ->
-                        // A FilterChip looks "selected" when `selected` is true. `==` compares.
-                        FilterChip(
-                            selected = vm.type == t,
-                            onClick = { vm.updateType(t) },
-                            // `t.label` is the Spanish name ("Poema" / "Canción").
-                            label = { Text(t.label) }
-                        )
-                    }
                     // How many audios the note has.
                     val audioCount = noteAudios.size
                     // Chip that opens the audios sheet. Its text is "Audios", "1 audio" or
@@ -394,9 +381,8 @@ fun EditorScreen(
                 VerseEditor(
                     value = vm.content,
                     onValueChange = vm::updateContent,
-                    // Hint text: "Write your lyrics here" for a song, "Write your verses
-                    // here" for a poem.
-                    placeholder = if (vm.type == NoteType.SONG) "Escribe aquí tu letra…" else "Escribe aquí tus versos…",
+                    // Hint text shown while the note is empty ("Write your verses here").
+                    placeholder = "Escribe aquí tus versos…",
                     analysis = analysis,
                     highlight = highlight,
                     // Show the syllables / rhyme margin only when the analysis is on.

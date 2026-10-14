@@ -26,8 +26,8 @@ en la app o se adjuntan audios, y se vinculan a las notas a las que pertenecen.
 ## Qué hace
 
 **Notas**
-- Poemas y canciones como notas, con título, tipo (Poema / Canción) y uno de siete colores
-  de papel (con variante nocturna).
+- Poemas y canciones como notas, con título y uno de siete colores de papel (con variante
+  nocturna).
 - Fijar notas arriba, búsqueda por título y contenido, cuadrícula escalonada.
 - Autoguardado: sin botón de guardar; una nota que se deja vacía se descarta.
 

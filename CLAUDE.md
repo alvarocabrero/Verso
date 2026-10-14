@@ -56,7 +56,8 @@ docs/                    architecture, analysis-engine, editor, development (+ d
 
 ## Data and editor
 
-- `Note`: id, title, content, type (`NoteType.POEM` / `SONG`), color (index into
+- `Note`: id, title, content, type (`NoteType.POEM` / `SONG`; hidden from the UI since 0.2.2,
+  kept for compatibility), color (index into
   `NotePalette`), pinned, created, modified.
 - **Database compatibility**: the table (`notas`) and columns keep the Spanish names from
   v0.1.0 via `@ColumnInfo`, and `Converters` stores `NoteType` as `"POEMA"`/`"CANCION"`.

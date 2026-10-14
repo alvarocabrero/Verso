@@ -101,6 +101,8 @@ data class Note(
   `Converters` guarda `NoteType` como `"POEMA"` / `"CANCION"`, igual que la 0.1.0. Así el
   código se ha podido pasar al inglés sin migrar la base de datos: al actualizar desde la
   0.1.0 se conservan todas las notas.
+- `type` (poema / canción) ya no se muestra ni se puede cambiar desde la 0.2.2; la columna se
+  conserva para no tener que migrar y que las notas antiguas mantengan su valor.
 - Orden de la lista: `fijada DESC, modificada DESC` (fijadas primero y luego las más
   recientes).
 - Búsqueda: `LIKE '%texto%'` sobre título y contenido. `LIKE` en SQLite no distingue
@@ -149,7 +151,7 @@ nota no tiene color.
 `EditorViewModel` guarda el estado de la nota como estado de Compose (`mutableStateOf`)
 y lo persiste sin que el usuario tenga que hacer nada:
 
-1. Cada cambio (`updateTitle`, `updateContent`, `updateType`, `updateColor`,
+1. Cada cambio (`updateTitle`, `updateContent`, `updateColor`,
    `togglePinned`) marca `hasChanges` y programa un guardado a los **600 ms**,
    cancelando el anterior.
 2. `save()` inserta la nota si es nueva (y guarda el `id` que devuelve Room) o la

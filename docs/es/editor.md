@@ -22,7 +22,7 @@ está en [analysis-engine.md](analysis-engine.md); el ciclo de vida de la nota, 
 
 ```
  ←                  #   🖌  📌  🎨  🗑
- [Poema] [Canción] [🎧 2 audios]
+ [🎧 2 audios]
  Soneto de repente
  Un soneto me manda hacer Violante,        11  A
  que en mi vida me he visto en tanto
@@ -45,7 +45,7 @@ está en [analysis-engine.md](analysis-engine.md); el ciclo de vida de la nota, 
   (Darío, Machado, Bécquer, Lope, Lorca, Hernández…), dónde se ha encontrado en el texto
   y, en las aliteraciones, cuántas veces más de lo normal aparece el sonido y por qué
   cuenta como clara o posible. Los textos están en `ui/editor/DeviceInfo.kt`.
-- **Chip de audios** (junto a Poema / Canción): muestra cuántos audios tiene la nota y abre un
+- **Chip de audios** (encima del título): muestra cuántos audios tiene la nota y abre un
   panel para escucharlos, desvincularlos y vincular otros. Ver [architecture.md](architecture.md#audios).
 - **Botón del pincel** (barra superior, solo con el análisis visible): activa o desactiva el
   coloreado de rimas; se recuerda entre sesiones. Ver [Colorear las rimas](#colorear-las-rimas).

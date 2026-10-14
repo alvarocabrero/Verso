@@ -101,6 +101,8 @@ data class Note(
   `Converters` stores `NoteType` as `"POEMA"` / `"CANCION"`, as 0.1.0 did. This way the
   code could be translated to English without a database migration: updating from 0.1.0
   keeps every note.
+- `type` (poem / song) is no longer shown or editable since 0.2.2; the column is kept so no
+  migration is needed and older notes keep their value.
 - List order: `fijada DESC, modificada DESC` (pinned first, then most recently modified).
 - Search: `LIKE '%text%'` over title and content. SQLite's `LIKE` is case-insensitive for
   ASCII letters only, not for accented ones.
@@ -147,7 +149,7 @@ most 8 lines, keep line breaks, and only have a border when the note has no colo
 `EditorViewModel` holds the note as Compose state (`mutableStateOf`) and persists it with
 no action from the user:
 
-1. Every change (`updateTitle`, `updateContent`, `updateType`, `updateColor`,
+1. Every change (`updateTitle`, `updateContent`, `updateColor`,
    `togglePinned`) sets `hasChanges` and schedules a save **600 ms** later, cancelling
    the previous one.
 2. `save()` inserts the note if it is new (keeping the `id` Room returns) or updates it.

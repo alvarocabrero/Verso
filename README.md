@@ -28,8 +28,8 @@ The app's interface and analysis are in Spanish, and it is designed for Spanish 
 ## Features
 
 **Notes**
-- Poems and songs as notes, with a title, a type (Poem / Song) and one of seven paper
-  colours (each with a dark variant).
+- Poems and songs as notes, with a title and one of seven paper colours (each with a dark
+  variant).
 - Pin notes to the top, search by title and content, staggered grid.
 - Autosave: there is no save button, and a note left empty is discarded.
 

@@ -2,6 +2,14 @@
 
 [English](CHANGELOG.md) · **Español**
 
+## Sin publicar
+
+En `main`, todavía no está en ninguna versión publicada.
+
+### Eliminado
+- Las opciones *Poema* / *Canción* del editor y la etiqueta de tipo en las tarjetas de notas.
+  Las notas existentes no se ven afectadas.
+
 ## 0.2.1 (2026-10-02)
 
 ### Cambios

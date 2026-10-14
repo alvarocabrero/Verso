@@ -2,6 +2,14 @@
 
 **English** · [Español](CHANGELOG.es.md)
 
+## Unreleased
+
+On `main`, not yet in a published release.
+
+### Removed
+- The *Poema* / *Canción* options in the editor, and the type label on the note cards. Existing
+  notes are not affected.
+
 ## 0.2.1 (2026-10-02)
 
 ### Changed

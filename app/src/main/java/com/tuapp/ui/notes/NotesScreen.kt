@@ -200,15 +200,10 @@ private fun NoteCard(note: Note, audioCount: Int, onClick: () -> Unit) {
                     overflow = TextOverflow.Ellipsis
                 )
             }
-            Spacer(Modifier.height(10.dp))
-            // Bottom line of the card: type on the left, audio count and pin on the right.
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                // The note type's label (e.g. "Poema" or "Canción", "Poem" / "Song").
-                Text(
-                    note.type.label,
-                    style = MaterialTheme.typography.labelSmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
+            // Bottom line of the card, on the right: audio count and pin. It is only drawn when
+            // there is something to show (`||` = "or").
+            if (audioCount > 0 || note.pinned) Spacer(Modifier.height(10.dp))
+            if (audioCount > 0 || note.pinned) Row(verticalAlignment = Alignment.CenterVertically) {
                 // A flexible empty space that takes all the free width, pushing what follows
                 // to the right end.
                 Spacer(Modifier.weight(1f))

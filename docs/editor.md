@@ -22,7 +22,7 @@ is in [analysis-engine.md](analysis-engine.md); the note's lifecycle, in
 
 ```
  ←                  #   🖌  📌  🎨  🗑
- [Poema] [Canción] [🎧 2 audios]
+ [🎧 2 audios]
  Soneto de repente
  Un soneto me manda hacer Violante,        11  A
  que en mi vida me he visto en tanto
@@ -45,7 +45,7 @@ is in [analysis-engine.md](analysis-engine.md); the note's lifecycle, in
   example (Darío, Machado, Bécquer, Lope, Lorca, Hernández…), where it was found in the
   text and, for alliterations, how many times more frequent than usual the sound is and
   why it counts as clear or possible. The texts live in `ui/editor/DeviceInfo.kt`.
-- **Audios chip** (next to Poema / Canción): shows how many audios the note has and opens a
+- **Audios chip** (above the title): shows how many audios the note has and opens a
   sheet to play, unlink and link them. See [architecture.md](architecture.md#audios).
 - **Brush button** (top bar, only while the analysis is shown): turns rhyme colouring on
   and off; remembered across sessions. See [Rhyme colouring](#rhyme-colouring).

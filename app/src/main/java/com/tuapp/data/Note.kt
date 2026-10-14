@@ -34,6 +34,10 @@ import androidx.room.TypeConverter
 /**
  * The kind of a note: a poem or a song.
  *
+ * Since 0.2.2 the app no longer shows or lets you change it (the "Poema" / "Canción"
+ * options were removed). The column stays in the database so that nothing has to be
+ * migrated and notes from older versions keep their value.
+ *
  * - `enum class` declares an "enumeration": a type with a fixed, closed list of possible values.
  *   A `NoteType` can only be `POEM` or `SONG`, nothing else.
  * - `(val label: String)` gives every value a property: [label] is the name shown in the

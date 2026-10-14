@@ -172,6 +172,8 @@ class EditorViewModel(
     // The note's text (the verses).
     var content by mutableStateOf(""); private set
     // Poem or song. `NoteType.POEM` is one value of an "enum" (a fixed list of options).
+    // Since 0.2.2 it can no longer be changed in the app; it is only loaded and saved back as
+    // it was, so older notes keep their value.
     var type by mutableStateOf(NoteType.POEM); private set
     // Background colour: a position (index) in the palette `NotePalette`. 0 = default colour.
     // `mutableIntStateOf` is the same as `mutableStateOf` but optimised for whole numbers.
@@ -363,8 +365,6 @@ class EditorViewModel(
     fun updateTitle(t: String) { title = t; scheduleSave() }
     // New text typed.
     fun updateContent(t: String) { content = t; scheduleSave() }
-    // Poem / song chosen.
-    fun updateType(t: NoteType) { type = t; scheduleSave() }
     // Colour chosen (index into the palette).
     fun updateColor(c: Int) { color = c; scheduleSave() }
     // Pin / unpin. `!pinned` means "the opposite of pinned" (true becomes false and back).
