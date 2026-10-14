@@ -236,7 +236,13 @@ Así riman en consonante *guerra / tierra*, *gente / fuente*, *hoy / voy*, *fueg
 
 - Vocal tónica + vocal de la **última sílaba** (en diptongo, la fuerte).
 - En la última sílaba átona, **i ≈ e** y **u ≈ o**: *fácil / calle*, *Venus / tenso*.
-- Si la palabra es aguda, la clave es solo la vocal tónica (*amor* → *o*).
+- Si la palabra es aguda, solo tiene una vocal que comparar, y la regla clásica se conforma
+  con eso (*amor / sol*). Verso es más estricto: la clave es la vocal tónica más el **tipo de
+  consonante final**, así que el final también tiene que sonar parecido. Tipos: ninguno
+  (final abierto, una i/u final de diptongo o una *d* final, casi muda al hablar), m/n, r, l,
+  s/z/c suave/x, y las oclusivas p/t/k/b/g; cualquier otra consonante es su propio tipo.
+  *boys / hop* (s frente a p) y *amor / sol* (r frente a l) no riman; *yo / hoy*,
+  *voz / dos*, *hop / rock* y *verdad / está* sí.
 - Ejemplos: *cántaro / pájaro* (a-o), *sangre / hambre* (a-e). *mar / montaña* no riman
   (aguda frente a llana).
 

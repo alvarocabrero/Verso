@@ -494,7 +494,8 @@ object Recursos {
                 Pal(
                     p, li, i, final = i == ps.lastIndex, larga = Silabeador.silabear(p).size >= 2,
                     consonante = t?.consonante?.takeIf { it.length >= 2 },
-                    asonante = t?.asonante?.takeIf { it.length == 2 }
+                    // (`all { ... }`: every character is a vowel; *aguda* keys like "os" are not.)
+                    asonante = t?.asonante?.takeIf { it.length == 2 && it.all { c -> c in "aeiou" } }
                 )
             }
         }

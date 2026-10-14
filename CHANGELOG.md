@@ -11,6 +11,9 @@ On `main`, not yet in a published release.
   pair of tints looks on the note (light and dark mode); the two blues that were easy to
   confuse are gone. From the ninth rhyme group on, colours are reused but underlined, so two
   different rhymes never share the same look.
+- **Stricter assonant rhyme for words stressed on the last syllable.** Since only one vowel
+  counts there, the final consonant must now be of a similar kind too: *boys / hop* or
+  *amor / sol* no longer rhyme, while *yo / hoy*, *voz / dos* or *hop / rock* still do.
 
 ### Removed
 - The *Poema* / *Canción* options in the editor, and the type label on the note cards. Existing

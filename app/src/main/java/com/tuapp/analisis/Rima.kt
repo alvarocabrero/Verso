@@ -34,6 +34,9 @@ package com.tuapp.analisis
 //     syllable. In a *diptongo* (two vowels in one syllable) the strong one (a, e, o) counts.
 //     In the last, unstressed syllable, i sounds close enough to e, and u to o, so "fácil /
 //     calle" (a-e) and "Venus / tenso" (e-o) are treated as rhyming.
+//     Verso is stricter than the classical rule with *agudas* (stress on the last syllable),
+//     where only one vowel counts: their final consonant must also be of a similar kind, so
+//     "boys / hop" or "amor / sol" do not rhyme, but "voz / dos" and "yo / hoy" do.
 //   - The comparison is made by SOUND, not by spelling:
 //       · b and v sound the same in Spanish;
 //       · h is silent;
@@ -225,6 +228,39 @@ object Rima {
         return s.replace("ç", "ch").map { if (it == 'y') 'y' else sinTilde(it) }.joinToString("")
     }
 
+    /**
+     * The kind of sound an *aguda* ending closes on, used to make vowel rhyme stricter there.
+     *
+     * In a word stressed on its last syllable, the vowel rhyme has only ONE vowel, so by the
+     * classical rule "boys" and "hop" rhyme (both ó). To the ear, and in song lyrics, they do
+     * not: one ends in s and the other in p. So for *agudas* the last consonant must also be of
+     * a similar kind. Returns:
+     * - "" (nothing) for an open ending: "yo", "hoy" (a final i/u glide does not count) and a
+     *   final d, which is almost silent in speech ("verdad" sounds like "verdá");
+     * - "n" for m / n ("canción / bombón"); "r" for r; "l" for l (so "amor / sol" no longer
+     *   rhyme);
+     * - "s" for s, z, soft c and x ("voz / dos");
+     * - "t" for the stops p, t, k, b, g ("hop / rock");
+     * - any other consonant, itself.
+     * None of these letters is a vowel, so a key like "os" can never be mistaken for a two-vowel
+     * key like "oe".
+     *
+     * Receives: [fon], the ending already turned into sounds by [fonetica] ("ois" for "oys").
+     * KOTLIN SYNTAX: `lastOrNull { ... }` gives the last character that meets the condition, or
+     * null if none does; `?: return ""` leaves with "" in that case.
+     */
+    private fun cierreAgudo(fon: String): String {
+        // The last consonant after the stressed vowel (the vowels and glides are skipped).
+        val c = fon.drop(1).lastOrNull { it !in "aeiou" } ?: return ""
+        return when (c) {
+            'd' -> ""
+            'm', 'n' -> "n"
+            's', 'θ', 'x' -> "s"
+            'p', 't', 'k', 'b', 'g' -> "t"
+            else -> "$c"
+        }
+    }
+
     // ---------- Public API ----------
     //
     // "Public API" = functions the rest of the app can call. They have no `private`, so they
@@ -245,8 +281,9 @@ object Rima {
      * 2. Find its stressed syllable, and the stressed vowel inside that syllable.
      * 3. The written ending goes from that vowel to the end of the word.
      * 4. The vowel key (*asonante*):
-     *    - if the word is *aguda* (the stressed syllable is the last one), only the stressed
-     *      vowel ("amor" gives "o");
+     *    - if the word is *aguda* (the stressed syllable is the last one), the stressed vowel
+     *      plus the kind of its final consonant ("amor" gives "or", "boys" gives "os", "hoy"
+     *      gives "o"; see [cierreAgudo]);
      *    - otherwise, the stressed vowel + the main vowel of the last syllable, with i turned
      *      into e and u into o ("fácil" gives "ae", same as "calle").
      * 5. The full-rhyme key (*consonante*) is the written ending passed through `fonetica`.
@@ -271,7 +308,8 @@ object Rima {
         // Step 4. The stressed vowel without accent mark (first letter of the ending).
         val tonica = sinTilde(texto[0])
         // `"$tonica"` is a string template: `$name` inside quotes is replaced by its value.
-        val asonante = if (t == silabas.lastIndex) "$tonica" else {
+        // *Aguda*: the stressed vowel plus the kind of sound it ends on (see [cierreAgudo]).
+        val asonante = if (t == silabas.lastIndex) "$tonica${cierreAgudo(fonetica(texto, seseo))}" else {
             // Not *aguda*: look at the last syllable.
             val ult = silabas.last()
             // Its main vowel, without accent mark (or null if it has none). `?.let` only runs

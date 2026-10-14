@@ -104,6 +104,24 @@ class RimaTest {
     }
 
     /**
+     * *Agudas* (stress on the last syllable): only one vowel counts, so Verso also asks for a
+     * final consonant of a similar kind. "boys" / "hop" share the ó but end in s and p: no
+     * rhyme (it used to be *asonante*). The same for "amor" / "sol" (r and l). Open endings
+     * still rhyme ("yo" / "hoy": the final y is a glide, not a consonant), as do similar
+     * consonants: "voz" / "dos" (z and s), "Islam" / "pan" (m and n), "hop" / "rock" (p and
+     * k), and a final d counts as silent ("verdad" / "está").
+     */
+    @Test fun agudasExigenCierreParecido() {
+        assertNull(rima("Va por vosotros B-Boys", "allá del hip hop"))
+        assertNull(rima("amor", "sol"))
+        assertEquals(ASONANTE, rima("yo", "hoy"))
+        assertEquals(ASONANTE, rima("voz", "dos"))
+        assertEquals(ASONANTE, rima("Islam", "pan"))
+        assertEquals(ASONANTE, rima("hop", "rock"))
+        assertEquals(ASONANTE, rima("verdad", "está"))
+    }
+
+    /**
      * *Seseo*: without it, "casa" / "caza" is only *asonante* ("s" and "z" sound different in
      * Spain). With `seseo = true` they sound the same, so it becomes *consonante*.
      */
@@ -166,12 +184,12 @@ class RimaTest {
 
     /**
      * A line with only an *asonante* match joins an existing *consonante* group.
-     * "amor", "flor", "dolor" rhyme fully (group A); "sol" only shares the vowel "o", so it
-     * joins group A as *asonante*. The empty line "" shows as a space: "AA AA".
-     * `r[3]` ("dolor") must be `CONSONANTE` and `r[4]` ("sol") `ASONANTE`.
+     * "cielo", "suelo", "anhelo" rhyme fully (group A); "lejos" only shares the vowels e-o, so
+     * it joins group A as *asonante*. The empty line "" shows as a space: "AA AA".
+     * `r[3]` ("anhelo") must be `CONSONANTE` and `r[4]` ("lejos") `ASONANTE`.
      */
     @Test fun asonanteSeUneAGrupoConsonante() {
-        val r = Rima.esquema(listOf("amor", "flor", "", "dolor", "sol"))
+        val r = Rima.esquema(listOf("cielo", "suelo", "", "anhelo", "lejos"))
         assertEquals("AA AA", Rima.esquemaComoTexto(r))
         assertEquals(CONSONANTE, r[3]!!.tipo)
         assertEquals(ASONANTE, r[4]!!.tipo)

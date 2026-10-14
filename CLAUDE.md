@@ -18,8 +18,8 @@ text analysis: metrical syllables per line, rhymes and literary devices.
 
 ## Status
 
-- Builds with no warnings (`gradlew assembleDebug` / `assembleRelease`) and the 70 JVM
-  tests pass (62 engine + 5 audio helpers + 3 rhyme colours;
+- Builds with no warnings (`gradlew assembleDebug` / `assembleRelease`) and the 71 JVM
+  tests pass (63 engine + 5 audio helpers + 3 rhyme colours;
   `gradlew testDebugUnitTest`). Tested on an emulator, not yet on a
   real phone.
 - Releases on GitHub: v0.2.1 (current, signed APK, ~1.4 MB), v0.2.0 and v0.1.0.
@@ -92,7 +92,8 @@ vowels first and marks applied ones with "‿". `metroDominante(versos)` picks t
 that fits most lines. `nombreMetro(n)` → "endecasílabo", etc.
 
 **Rima**: `terminacion(verso)` gives consonant keys (phonetic: b=v, silent h, yeísmo,
-optional seseo) and assonant keys (stressed + final vowel; in an unstressed final
+optional seseo) and assonant keys (stressed + final vowel; agudas add the kind of final
+consonant, so boys/hop and amor/sol do not rhyme; in an unstressed final
 position i≈e, u≈o). `comparar(a, b)` and `esquema(lineas)` → ABBA letters, "-" for
 unrhymed lines, `minusculas` for arte menor.
 

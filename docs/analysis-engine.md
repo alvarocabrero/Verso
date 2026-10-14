@@ -261,7 +261,13 @@ So *guerra / tierra*, *gente / fuente*, *hoy / voy* and *fuego / juego* are full
 
 - The stressed vowel + the vowel of the **last syllable** (in a diphthong, the strong one).
 - In an unstressed last syllable, **i ≈ e** and **u ≈ o**: *fácil / calle*, *Venus / tenso*.
-- If the word is *aguda*, the key is just the stressed vowel (*amor* → *o*).
+- If the word is *aguda*, it has only one vowel to compare, which the classical rule finds
+  enough (*amor / sol*). Verso is stricter: the key is the stressed vowel plus the **kind of
+  its final consonant**, so the ending must also sound alike. Kinds: none (open ending, a
+  final i/u glide or a final *d*, nearly silent in speech), m/n, r, l, s/z/soft c/x, and the
+  stops p/t/k/b/g; any other consonant is its own kind. *boys / hop* (s vs p) and
+  *amor / sol* (r vs l) don't rhyme; *yo / hoy*, *voz / dos*, *hop / rock* and
+  *verdad / está* do.
 - Examples: *cántaro / pájaro* (a-o), *sangre / hambre* (a-e). *mar / montaña* don't rhyme
   (*aguda* vs *llana*).
 
