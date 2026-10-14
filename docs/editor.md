@@ -139,11 +139,15 @@ With the brush button on (`Preferences.colorRhymes`, key `color_rhymes`), the ed
 highlighter background behind each span from `AnalisisPoema.tramosDeRima` (see
 [analysis-engine.md](analysis-engine.md#rhyme-colouring-spans)):
 
-- **Colour per group**: `rhymeColor(group)` in `ui/theme/RhymeColors.kt`, from the
-  Okabe–Ito palette (orange, sky blue, bluish green, yellow, blue, vermilion, reddish
-  purple, olive), which stays distinguishable for colour-blind readers. It repeats from the
-  ninth group.
-- **Strength**: full rhymes at 26 % opacity, assonant rhymes at 12 % (34 % and 17 % in dark
+- **Colour per group**: `rhymeColor(group)` in `ui/theme/RhymeColors.kt`: green, magenta,
+  golden yellow, navy, aqua, red, sky blue and orange. They were chosen by measurement so that
+  two different rhymes never look alike: every pair of tints, blended on the light and dark
+  paper at full and assonant strength, differs by at least about 16 (CIEDE2000; about 10 for
+  the softer assonant tints), and consecutive groups (A/B, B/C…) by much more.
+  `RhymeColorsTest` keeps it that way. From the ninth group on the colours are reused, but
+  those groups are also **underlined** (`rhymeUnderlined`), so they never look like the earlier
+  group with the same colour.
+- **Strength**: full rhymes at 32 % opacity, assonant rhymes at 16 % (42 % and 21 % in dark
   mode, where tints are less visible). Only the rhyming ending is coloured, not the whole word.
 - The **margin letter** gets the same background, and the expanded panel shows a legend
   with the letters in use next to the seseo chip.

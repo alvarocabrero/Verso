@@ -113,6 +113,7 @@ app/src/main/java/com/tuapp/
   analisis/            Motor de análisis en Kotlin puro (sin Android)
 app/src/test/java/com/tuapp/analisis/   Tests JUnit del motor (62)
 app/src/test/java/com/tuapp/audio/      Tests JUnit de las utilidades de audio (5)
+app/src/test/java/com/tuapp/ui/theme/   Tests JUnit de los colores de rima (3)
 docs/                  Documentación técnica en inglés (docs/es/: en español)
 ```
 

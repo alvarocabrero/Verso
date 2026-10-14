@@ -118,6 +118,7 @@ app/src/main/java/com/tuapp/
   analisis/            Analysis engine in pure Kotlin (no Android dependencies)
 app/src/test/java/com/tuapp/analisis/   JUnit tests for the engine (62)
 app/src/test/java/com/tuapp/audio/      JUnit tests for the audio helpers (5)
+app/src/test/java/com/tuapp/ui/theme/   JUnit tests for the rhyme colours (3)
 docs/                  Technical documentation (docs/es/: Spanish copy)
 ```
 

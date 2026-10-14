@@ -6,6 +6,12 @@
 
 En `main`, todavía no está en ninguna versión publicada.
 
+### Cambios
+- **Colores de rima que nunca se parecen.** Nueva paleta elegida midiendo lo distinto que se ve
+  cada par de tintes en la nota (modo claro y oscuro); ya no están los dos azules que se
+  confundían. A partir del noveno grupo de rima los colores se reutilizan pero subrayados, así
+  que dos rimas distintas nunca se ven iguales.
+
 ### Eliminado
 - Las opciones *Poema* / *Canción* del editor y la etiqueta de tipo en las tarjetas de notas.
   Las notas existentes no se ven afectadas.

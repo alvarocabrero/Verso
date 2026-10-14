@@ -139,10 +139,15 @@ Con el botón del pincel activado (`Preferences.colorRhymes`, clave `color_rhyme
 dibuja un fondo tipo rotulador detrás de cada tramo de `AnalisisPoema.tramosDeRima` (ver
 [analysis-engine.md](analysis-engine.md#tramos-para-colorear-las-rimas)):
 
-- **Un color por grupo**: `rhymeColor(group)` en `ui/theme/RhymeColors.kt`, de la paleta
-  Okabe–Ito (naranja, azul cielo, verde azulado, amarillo, azul, bermellón, púrpura rojizo,
-  oliva), que se distingue bien también con daltonismo. Se repite a partir del noveno grupo.
-- **Intensidad**: rimas consonantes al 26 % de opacidad y asonantes al 12 % (34 % y 17 % en
+- **Un color por grupo**: `rhymeColor(group)` en `ui/theme/RhymeColors.kt`: verde, magenta,
+  amarillo dorado, azul marino, aguamarina, rojo, azul cielo y naranja. Se eligieron midiendo,
+  para que dos rimas distintas nunca se parezcan: cada pareja de tintes, mezclados sobre el
+  papel claro y oscuro con la intensidad de rima consonante y asonante, se diferencia en al
+  menos unos 16 puntos (CIEDE2000; unos 10 en los tintes suaves de las asonantes), y los grupos
+  seguidos (A/B, B/C…) mucho más. `RhymeColorsTest` vigila que siga así. A partir del noveno
+  grupo los colores se reutilizan, pero esos grupos van además **subrayados**
+  (`rhymeUnderlined`), así que nunca se confunden con el grupo anterior del mismo color.
+- **Intensidad**: rimas consonantes al 32 % de opacidad y asonantes al 16 % (42 % y 21 % en
   modo oscuro, donde el tinte se ve menos). Solo se colorea la terminación que rima, no la
   palabra entera.
 - La **letra del margen** lleva el mismo fondo, y el panel desplegado muestra una leyenda con

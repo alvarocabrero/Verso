@@ -6,6 +6,12 @@
 
 On `main`, not yet in a published release.
 
+### Changed
+- **Rhyme colours that never look alike.** New palette chosen by measuring how different every
+  pair of tints looks on the note (light and dark mode); the two blues that were easy to
+  confuse are gone. From the ninth rhyme group on, colours are reused but underlined, so two
+  different rhymes never share the same look.
+
 ### Removed
 - The *Poema* / *Canción* options in the editor, and the type label on the note cards. Existing
   notes are not affected.

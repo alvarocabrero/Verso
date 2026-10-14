@@ -88,6 +88,7 @@ import com.tuapp.analisis.Recursos
 import com.tuapp.analisis.Rima
 import com.tuapp.ui.theme.VerseStyle
 import com.tuapp.ui.theme.rhymeBackground
+import com.tuapp.ui.theme.rhymeUnderlined
 import androidx.compose.foundation.shape.RoundedCornerShape
 
 // ===============================================================================================
@@ -271,12 +272,13 @@ fun VerseEditor(
     val rhymeSpans = remember(analysis, colorRhymes) {
         if (colorRhymes && analysis != null) AnalisisPoema.tramosDeRima(analysis) else emptyList()
     }
-    // For each rhyme span: shift its range to the current text and pair it with its fill colour.
-    // `a to b` makes a pair `(range, colour)`. `shift?.invoke(span.rango)` calls the `shift`
+    // For each rhyme span: shift its range to the current text and keep it with its fill colour
+    // and whether it must also be underlined (`Triple` holds three values).
+    // `shift?.invoke(span.rango)` calls the `shift`
     // function (if there is one) on the span's range; if the result is null (no shift function,
     // or the span touches the edit), `?.let` is skipped and `mapNotNull` drops it.
     val rhymeFills = rhymeSpans.mapNotNull { span ->
-        shift?.invoke(span.rango)?.let { it to rhymeBackground(span.grupo, span.tipo) }
+        shift?.invoke(span.rango)?.let { Triple(it, rhymeBackground(span.grupo, span.tipo), rhymeUnderlined(span.grupo)) }
     }
 
     // Own TextFieldValue, so we know where the cursor is.
@@ -367,7 +369,7 @@ fun VerseEditor(
                     val l = layout ?: return@drawBehind
                     // First, the rhyme colours. `forEach { (range, fill) -> ... }` goes through
                     // the pairs, "unpacking" each into `range` and `fill`.
-                    rhymeFills.forEach { (range, fill) -> drawBackground(l, range, fill) }
+                    rhymeFills.forEach { (range, fill, underline) -> drawBackground(l, range, fill, underline) }
                     // Then, on top, the selected device's highlight (if any), in the main colour.
                     if (shiftedHighlight != null) drawHighlight(l, shiftedHighlight, colors.primary)
                 }
@@ -551,8 +553,10 @@ private fun VerseMargin(
  * @param layout the text layout, to find where the characters are on screen.
  * @param range the characters to paint behind (both ends included).
  * @param fill the colour to paint.
+ * @param underline also draw a solid line under the characters (for rhyme groups that reuse a
+ *   colour). `= false` is a default value: callers that do not pass it get no underline.
  */
-private fun DrawScope.drawBackground(layout: TextLayoutResult, range: IntRange, fill: Color) {
+private fun DrawScope.drawBackground(layout: TextLayoutResult, range: IntRange, fill: Color, underline: Boolean = false) {
     // First character, and the position just AFTER the last one (`last + 1`), as layouts expect.
     val start = range.first
     val end = range.last + 1
@@ -585,6 +589,13 @@ private fun DrawScope.drawBackground(layout: TextLayoutResult, range: IntRange, 
             size = Size(right - left + 4.dp.toPx(), lineHeight * .8f),
             cornerRadius = CornerRadius(4.dp.toPx())
         )
+        // Groups that reuse a palette colour (the ninth on) also get a solid line under the
+        // letters, in the same colour but fully opaque (`copy(alpha = 1f)`), so they never look
+        // like the earlier group with the same tint.
+        if (underline) {
+            val y = baseline + 3.dp.toPx()
+            drawLine(fill.copy(alpha = 1f), Offset(left, y), Offset(right, y), strokeWidth = 2.dp.toPx())
+        }
     }
 }
 
