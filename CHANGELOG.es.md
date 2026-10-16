@@ -2,9 +2,7 @@
 
 [English](CHANGELOG.md) · **Español**
 
-## Sin publicar
-
-En `main`, todavía no está en ninguna versión publicada.
+## 0.2.2 (2026-10-16)
 
 ### Cambios
 - **Colores de rima que nunca se parecen.** Nueva paleta elegida midiendo lo distinto que se ve

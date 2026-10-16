@@ -2,9 +2,7 @@
 
 **English** · [Español](CHANGELOG.es.md)
 
-## Unreleased
-
-On `main`, not yet in a published release.
+## 0.2.2 (2026-10-16)
 
 ### Changed
 - **Rhyme colours that never look alike.** New palette chosen by measuring how different every

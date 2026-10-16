@@ -46,7 +46,8 @@ en la app o se adjuntan audios, y se vinculan a las notas a las que pertenecen.
   (sinalefa, ley del acento final). Los versos que no encajan salen en rojo.
 - **Rima**: letra de rima al margen (ABBA…), consonante y asonante, con equivalencias
   fonéticas (b = v, h muda, yeísmo) y **seseo** opcional para acento latinoamericano o andaluz.
-  Minúsculas en arte menor (8 sílabas o menos).
+  Minúsculas en arte menor (8 sílabas o menos). En las palabras agudas, la asonante también
+  pide una consonante final parecida (*yo / hoy* sí, *boys / hop* no).
 - **Recursos literarios**: aliteración (clara o posible), anáfora, epífora, anadiplosis,
   epanadiplosis, geminación, polisíndeton, asíndeton, paralelismo, estribillo y rima interna.
   Al tocar uno se resaltan sus palabras y la pantalla se desplaza hasta él.
@@ -55,6 +56,8 @@ en la app o se adjuntan audios, y se vinculan a las notas a las que pertenecen.
 - Resumen siempre visible: *«Endecasílabo · ABBA ABBA · 3 recursos»*.
 - **Colorear rimas** (botón del pincel): cada grupo de rima tiene su color de rotulador en la
   terminación que rima, más suave en las asonantes; las rimas internas toman el color de su grupo.
+  Los colores están elegidos para que dos rimas distintas nunca se parezcan, y a partir del
+  noveno grupo además van subrayados.
 - Se puede ocultar todo el análisis con el botón **#** de la barra superior.
 
 ## Descargar
@@ -111,7 +114,7 @@ app/src/main/java/com/tuapp/
   ui/editor/           Editor con autoguardado y análisis en tiempo real
   ui/theme/            Tema "tinta sobre papel", estilos de verso y paleta de notas
   analisis/            Motor de análisis en Kotlin puro (sin Android)
-app/src/test/java/com/tuapp/analisis/   Tests JUnit del motor (62)
+app/src/test/java/com/tuapp/analisis/   Tests JUnit del motor (63)
 app/src/test/java/com/tuapp/audio/      Tests JUnit de las utilidades de audio (5)
 app/src/test/java/com/tuapp/ui/theme/   Tests JUnit de los colores de rima (3)
 docs/                  Documentación técnica en inglés (docs/es/: en español)

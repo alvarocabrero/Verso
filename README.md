@@ -50,7 +50,9 @@ The app's interface and analysis are in Spanish, and it is designed for Spanish 
 - **Rhyme**: rhyme letter in the margin (ABBA…), both *consonant* (full rhyme) and
   *assonant* (vowels only). Rhymes are compared by sound (b = v, silent h, *yeísmo*), with
   optional *seseo* (s = z = soft c) for Latin American or Andalusian accents. Letters are
-  lowercase for short-line verse (*arte menor*, 8 syllables or fewer).
+  lowercase for short-line verse (*arte menor*, 8 syllables or fewer). Words stressed on the
+  last syllable also need a similar final consonant to rhyme in assonance (*yo / hoy* yes,
+  *boys / hop* no).
 - **Literary devices**: alliteration (clear or possible), anaphora, epiphora, anadiplosis,
   epanadiplosis, geminatio, polysyndeton, asyndeton, parallelism, refrain and internal rhyme.
   Tapping one highlights its words and scrolls to it.
@@ -59,7 +61,9 @@ The app's interface and analysis are in Spanish, and it is designed for Spanish 
 - An always-visible summary: *«Endecasílabo · ABBA ABBA · 3 recursos»* (hendecasyllable,
   rhyme scheme, number of devices).
 - **Rhyme colouring** (brush button): each rhyme group gets its own highlighter colour on the
-  rhyming ending, softer for assonant rhymes; internal rhymes take their group's colour.
+  rhyming ending, softer for assonant rhymes; internal rhymes take their group's colour. The
+  colours are chosen so that two different rhymes never look alike, and from the ninth group
+  on they are also underlined.
 - The whole analysis can be hidden with the **#** button in the top bar.
 
 ## Download
@@ -116,7 +120,7 @@ app/src/main/java/com/tuapp/
   ui/editor/           Editor with autosave and real-time analysis
   ui/theme/            "Ink on paper" theme, verse text styles and note palette
   analisis/            Analysis engine in pure Kotlin (no Android dependencies)
-app/src/test/java/com/tuapp/analisis/   JUnit tests for the engine (62)
+app/src/test/java/com/tuapp/analisis/   JUnit tests for the engine (63)
 app/src/test/java/com/tuapp/audio/      JUnit tests for the audio helpers (5)
 app/src/test/java/com/tuapp/ui/theme/   JUnit tests for the rhyme colours (3)
 docs/                  Technical documentation (docs/es/: Spanish copy)
